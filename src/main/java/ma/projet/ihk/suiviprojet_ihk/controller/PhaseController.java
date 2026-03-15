@@ -1,12 +1,16 @@
 package ma.projet.ihk.suiviprojet_ihk.controller;
 
+import ma.projet.ihk.suiviprojet_ihk.dto.PhaseDTO;
 import ma.projet.ihk.suiviprojet_ihk.entities.Phase;
+import ma.projet.ihk.suiviprojet_ihk.exception.PhaseNotFoundException;
+import ma.projet.ihk.suiviprojet_ihk.mapper.PhaseMapper;
 import ma.projet.ihk.suiviprojet_ihk.service.PhaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/phases")
@@ -16,99 +20,125 @@ public class PhaseController {
     @Autowired
     private PhaseService phaseService;
 
-    // Récupérer toutes les phases
+    @Autowired
+    private PhaseMapper phaseMapper;
+
+    // GET toutes les phases
     @GetMapping
-    public List<Phase> getAllPhases() {
-        return phaseService.getAllPhases();
+    public List<PhaseDTO> getAllPhases() {
+        List<Phase> phases = phaseService.getAllPhases();
+        return phases.stream()
+                .map(phaseMapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    // Récupérer une phase par ID
+    // GET par ID
     @GetMapping("/{id}")
-    public ResponseEntity<Phase> getPhaseById(@PathVariable Long id) {
-        return phaseService.getPhaseById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<PhaseDTO> getPhaseById(@PathVariable Long id) {
+        Phase phase = phaseService.getPhaseById(id)
+                .orElseThrow(() -> new PhaseNotFoundException("Phase non trouvée avec l'ID: " + id));
+        return ResponseEntity.ok(phaseMapper.toDto(phase));
     }
 
-    // Créer une nouvelle phase
+    // POST créer une phase
     @PostMapping
-    public ResponseEntity<Phase> createPhase(@RequestBody Phase phase) {
+    public ResponseEntity<PhaseDTO> createPhase(@RequestBody PhaseDTO dto) {
+        Phase phase = phaseMapper.toEntity(dto);
         Phase saved = phaseService.savePhase(phase);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+        return new ResponseEntity<>(phaseMapper.toDto(saved), HttpStatus.CREATED);
     }
 
-    // Modifier une phase
+    // PUT modifier une phase
     @PutMapping("/{id}")
-    public ResponseEntity<Phase> updatePhase(@PathVariable Long id, @RequestBody Phase phase) {
-        Phase updated = phaseService.updatePhase(id, phase);
-        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
+    public ResponseEntity<PhaseDTO> updatePhase(@PathVariable Long id, @RequestBody PhaseDTO dto) {
+        Phase existingPhase = phaseService.getPhaseById(id)
+                .orElseThrow(() -> new PhaseNotFoundException("Phase non trouvée avec l'ID: " + id));
+
+        phaseMapper.updateEntityFromDto(dto, existingPhase);
+        Phase updated = phaseService.savePhase(existingPhase);
+        return ResponseEntity.ok(phaseMapper.toDto(updated));
     }
 
-    // Supprimer une phase
+    // DELETE supprimer une phase
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePhase(@PathVariable Long id) {
         phaseService.deletePhase(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Récupérer les phases d'un projet
+    // GET phases par projet
     @GetMapping("/projet/{projetId}")
-    public List<Phase> getPhasesByProjet(@PathVariable Long projetId) {
-        return phaseService.getPhasesByProjet(projetId);
+    public List<PhaseDTO> getPhasesByProjet(@PathVariable Long projetId) {
+        List<Phase> phases = phaseService.getPhasesByProjet(projetId);
+        return phases.stream()
+                .map(phaseMapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    // Récupérer les phases terminées mais non facturées (pour comptable)
+    // GET phases terminées non facturées
     @GetMapping("/statut/terminees-non-facturees")
-    public List<Phase> getPhasesTermineesNonFacturees() {
-        return phaseService.getPhasesTermineesNonFacturees();
+    public List<PhaseDTO> getPhasesTermineesNonFacturees() {
+        List<Phase> phases = phaseService.getPhasesTermineesNonFacturees();
+        return phases.stream()
+                .map(phaseMapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    // Récupérer les phases facturées mais non payées (pour comptable)
+    // GET phases facturées non payées
     @GetMapping("/statut/facturees-non-payees")
-    public List<Phase> getPhasesFactureesNonPayees() {
-        return phaseService.getPhasesFactureesNonPayees();
+    public List<PhaseDTO> getPhasesFactureesNonPayees() {
+        List<Phase> phases = phaseService.getPhasesFactureesNonPayees();
+        return phases.stream()
+                .map(phaseMapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    // Récupérer les phases payées
+    // GET phases payées
     @GetMapping("/statut/payees")
-    public List<Phase> getPhasesPayees() {
-        return phaseService.getPhasesPayees();
+    public List<PhaseDTO> getPhasesPayees() {
+        List<Phase> phases = phaseService.getPhasesPayees();
+        return phases.stream()
+                .map(phaseMapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    // Récupérer les phases terminées d'un projet
-    @GetMapping("/projet/{projetId}/terminees")
-    public List<Phase> getPhasesTermineesByProjet(@PathVariable Long projetId) {
-        return phaseService.getPhasesTermineesByProjet(projetId);
-    }
-
-    // Marquer une phase comme terminée
+    // PUT marquer phase comme terminée
     @PutMapping("/{id}/terminer")
-    public ResponseEntity<Phase> marquerTerminee(@PathVariable Long id) {
+    public ResponseEntity<PhaseDTO> marquerTerminee(@PathVariable Long id) {
         Phase phase = phaseService.marquerTerminee(id);
-        return phase != null ? ResponseEntity.ok(phase) : ResponseEntity.notFound().build();
+        if (phase != null) {
+            return ResponseEntity.ok(phaseMapper.toDto(phase));
+        }
+        throw new PhaseNotFoundException("Phase non trouvée avec l'ID: " + id);
     }
 
-    // Marquer une phase comme facturée
+    // PUT marquer phase comme facturée
     @PutMapping("/{id}/facturer")
-    public ResponseEntity<Phase> marquerFacturee(@PathVariable Long id) {
+    public ResponseEntity<PhaseDTO> marquerFacturee(@PathVariable Long id) {
         Phase phase = phaseService.marquerFacturee(id);
-        return phase != null ? ResponseEntity.ok(phase) : ResponseEntity.notFound().build();
+        if (phase != null) {
+            return ResponseEntity.ok(phaseMapper.toDto(phase));
+        }
+        throw new PhaseNotFoundException("Phase non trouvée avec l'ID: " + id);
     }
 
-    // Marquer une phase comme payée
+    // PUT marquer phase comme payée
     @PutMapping("/{id}/payer")
-    public ResponseEntity<Phase> marquerPayee(@PathVariable Long id) {
+    public ResponseEntity<PhaseDTO> marquerPayee(@PathVariable Long id) {
         Phase phase = phaseService.marquerPayee(id);
-        return phase != null ? ResponseEntity.ok(phase) : ResponseEntity.notFound().build();
+        if (phase != null) {
+            return ResponseEntity.ok(phaseMapper.toDto(phase));
+        }
+        throw new PhaseNotFoundException("Phase non trouvée avec l'ID: " + id);
     }
 
-    // Obtenir le montant total des phases d'un projet
+    // GET montant total des phases d'un projet
     @GetMapping("/projet/{projetId}/montant-total")
     public ResponseEntity<Double> getMontantTotalByProjet(@PathVariable Long projetId) {
         return ResponseEntity.ok(phaseService.getMontantTotalPhasesByProjet(projetId));
     }
 
-    // Compter les phases en cours d'un projet
+    // GET count phases en cours d'un projet
     @GetMapping("/projet/{projetId}/en-cours")
     public ResponseEntity<Long> countPhasesEnCoursByProjet(@PathVariable Long projetId) {
         return ResponseEntity.ok(phaseService.countPhasesEnCoursByProjet(projetId));

@@ -1,12 +1,16 @@
 package ma.projet.ihk.suiviprojet_ihk.controller;
 
+import ma.projet.ihk.suiviprojet_ihk.dto.LivrableDTO;
 import ma.projet.ihk.suiviprojet_ihk.entities.Livrable;
+import ma.projet.ihk.suiviprojet_ihk.exception.LivrableNotFoundException;
+import ma.projet.ihk.suiviprojet_ihk.mapper.LivrableMapper;
 import ma.projet.ihk.suiviprojet_ihk.service.LivrableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/livrables")
@@ -16,54 +20,68 @@ public class LivrableController {
     @Autowired
     private LivrableService livrableService;
 
-    // Récupérer tous les livrables
+    @Autowired
+    private LivrableMapper livrableMapper;
+
+    // GET tous les livrables
     @GetMapping
-    public List<Livrable> getAllLivrables() {
-        return livrableService.getAllLivrables();
+    public List<LivrableDTO> getAllLivrables() {
+        List<Livrable> livrables = livrableService.getAllLivrables();
+        return livrables.stream()
+                .map(livrableMapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    // Récupérer un livrable par ID
+    // GET par ID
     @GetMapping("/{id}")
-    public ResponseEntity<Livrable> getLivrableById(@PathVariable Long id) {
-        return livrableService.getLivrableById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<LivrableDTO> getLivrableById(@PathVariable Long id) {
+        Livrable livrable = livrableService.getLivrableById(id)
+                .orElseThrow(() -> new LivrableNotFoundException("Livrable non trouvé avec l'ID: " + id));
+        return ResponseEntity.ok(livrableMapper.toDto(livrable));
     }
 
-    // Créer un nouveau livrable
+    // POST créer un livrable
     @PostMapping
-    public ResponseEntity<Livrable> createLivrable(@RequestBody Livrable livrable) {
+    public ResponseEntity<LivrableDTO> createLivrable(@RequestBody LivrableDTO dto) {
+        Livrable livrable = livrableMapper.toEntity(dto);
         Livrable saved = livrableService.saveLivrable(livrable);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+        return new ResponseEntity<>(livrableMapper.toDto(saved), HttpStatus.CREATED);
     }
 
-    // Modifier un livrable
+    // PUT modifier un livrable
     @PutMapping("/{id}")
-    public ResponseEntity<Livrable> updateLivrable(@PathVariable Long id, @RequestBody Livrable livrable) {
-        Livrable updated = livrableService.updateLivrable(id, livrable);
-        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
+    public ResponseEntity<LivrableDTO> updateLivrable(@PathVariable Long id, @RequestBody LivrableDTO dto) {
+        Livrable existingLivrable = livrableService.getLivrableById(id)
+                .orElseThrow(() -> new LivrableNotFoundException("Livrable non trouvé avec l'ID: " + id));
+
+        livrableMapper.updateEntityFromDto(dto, existingLivrable);
+        Livrable updated = livrableService.saveLivrable(existingLivrable);
+        return ResponseEntity.ok(livrableMapper.toDto(updated));
     }
 
-    // Supprimer un livrable
+    // DELETE supprimer un livrable
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLivrable(@PathVariable Long id) {
         livrableService.deleteLivrable(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Récupérer les livrables d'une phase
+    // GET livrables par phase
     @GetMapping("/phase/{phaseId}")
-    public List<Livrable> getLivrablesByPhase(@PathVariable Long phaseId) {
-        return livrableService.getLivrablesByPhase(phaseId);
+    public List<LivrableDTO> getLivrablesByPhase(@PathVariable Long phaseId) {
+        List<Livrable> livrables = livrableService.getLivrablesByPhase(phaseId);
+        return livrables.stream()
+                .map(livrableMapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    // Compter les livrables d'une phase
+    // GET count livrables par phase
     @GetMapping("/phase/{phaseId}/count")
     public ResponseEntity<Long> countLivrablesByPhase(@PathVariable Long phaseId) {
         return ResponseEntity.ok(livrableService.countLivrablesByPhase(phaseId));
     }
 
-    // Vérifier si une phase a des livrables
+    // GET vérifier si phase a des livrables
     @GetMapping("/phase/{phaseId}/exists")
     public ResponseEntity<Boolean> hasLivrables(@PathVariable Long phaseId) {
         return ResponseEntity.ok(livrableService.hasLivrables(phaseId));
