@@ -1,6 +1,9 @@
 package ma.projet.ihk.suiviprojet_ihk.controller;
 
+import ma.projet.ihk.suiviprojet_ihk.dto.FactureDTO;
 import ma.projet.ihk.suiviprojet_ihk.entities.Facture;
+import ma.projet.ihk.suiviprojet_ihk.exception.FactureNotFoundException;
+import ma.projet.ihk.suiviprojet_ihk.mapper.FactureMapper;
 import ma.projet.ihk.suiviprojet_ihk.service.FactureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -9,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/factures")
@@ -18,68 +22,82 @@ public class FactureController {
     @Autowired
     private FactureService factureService;
 
-    // Récupérer toutes les factures
+    @Autowired
+    private FactureMapper factureMapper;
+
+    // GET toutes les factures
     @GetMapping
-    public List<Facture> getAllFactures() {
-        return factureService.getAllFactures();
+    public List<FactureDTO> getAllFactures() {
+        List<Facture> factures = factureService.getAllFactures();
+        return factures.stream()
+                .map(factureMapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    // Récupérer une facture par ID
+    // GET par ID
     @GetMapping("/{id}")
-    public ResponseEntity<Facture> getFactureById(@PathVariable Long id) {
-        return factureService.getFactureById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<FactureDTO> getFactureById(@PathVariable Long id) {
+        Facture facture = factureService.getFactureById(id)
+                .orElseThrow(() -> new FactureNotFoundException("Facture non trouvée avec l'ID: " + id));
+        return ResponseEntity.ok(factureMapper.toDto(facture));
     }
 
-    // Créer une nouvelle facture
+    // POST créer une facture
     @PostMapping
-    public ResponseEntity<Facture> createFacture(@RequestBody Facture facture) {
+    public ResponseEntity<FactureDTO> createFacture(@RequestBody FactureDTO dto) {
         try {
+            Facture facture = factureMapper.toEntity(dto);
             Facture saved = factureService.saveFacture(facture);
-            return new ResponseEntity<>(saved, HttpStatus.CREATED);
+            return new ResponseEntity<>(factureMapper.toDto(saved), HttpStatus.CREATED);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
-    // Modifier une facture
+    // PUT modifier une facture
     @PutMapping("/{id}")
-    public ResponseEntity<Facture> updateFacture(@PathVariable Long id, @RequestBody Facture facture) {
-        Facture updated = factureService.updateFacture(id, facture);
-        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
+    public ResponseEntity<FactureDTO> updateFacture(@PathVariable Long id, @RequestBody FactureDTO dto) {
+        Facture existingFacture = factureService.getFactureById(id)
+                .orElseThrow(() -> new FactureNotFoundException("Facture non trouvée avec l'ID: " + id));
+
+        factureMapper.updateEntityFromDto(dto, existingFacture);
+        Facture updated = factureService.saveFacture(existingFacture);
+        return ResponseEntity.ok(factureMapper.toDto(updated));
     }
 
-    // Supprimer une facture
+    // DELETE supprimer une facture
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFacture(@PathVariable Long id) {
         factureService.deleteFacture(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Récupérer la facture d'une phase
+    // GET facture par phase
     @GetMapping("/phase/{phaseId}")
-    public ResponseEntity<Facture> getFactureByPhase(@PathVariable Long phaseId) {
+    public ResponseEntity<FactureDTO> getFactureByPhase(@PathVariable Long phaseId) {
         return factureService.getFactureByPhase(phaseId)
-                .map(ResponseEntity::ok)
+                .map(facture -> ResponseEntity.ok(factureMapper.toDto(facture)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Rechercher les factures par période
+    // GET factures par période
     @GetMapping("/periode")
-    public List<Facture> getFacturesByPeriode(
+    public List<FactureDTO> getFacturesByPeriode(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDebut,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin) {
-        return factureService.getFacturesByPeriode(dateDebut, dateFin);
+        List<Facture> factures = factureService.getFacturesByPeriode(dateDebut, dateFin);
+        return factures.stream()
+                .map(factureMapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    // Vérifier si une phase est déjà facturée
+    // GET vérifier si phase est facturée
     @GetMapping("/phase/{phaseId}/existe")
     public ResponseEntity<Boolean> phaseDejaFacturee(@PathVariable Long phaseId) {
         return ResponseEntity.ok(factureService.phaseDejaFacturee(phaseId));
     }
 
-    // Compter les factures sur une période
+    // GET count factures par période
     @GetMapping("/periode/count")
     public ResponseEntity<Long> countFacturesByPeriode(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDebut,
