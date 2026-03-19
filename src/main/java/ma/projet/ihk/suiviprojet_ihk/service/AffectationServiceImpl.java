@@ -73,8 +73,7 @@ public class AffectationServiceImpl implements AffectationService {
 
     @Override
     public boolean isEmployeAffectePhase(Long employeId, Long phaseId) {
-        AffectationId id = new AffectationId();
-        // Note: Vous devrez peut-être adapter selon comment AffectationId est construit
+        AffectationId id = new AffectationId(employeId.intValue(), phaseId.intValue());        // Note: Vous devrez peut-être adapter selon comment AffectationId est construit
         // Cette méthode dépend de la structure exacte de votre AffectationId
         return affectationRepository.existsById(id);
     }
