@@ -26,7 +26,6 @@ public class AffectationController {
     @Autowired
     private AffectationMapper affectationMapper;
 
-    // GET toutes les affectations
     @GetMapping
     public List<AffectationDTO> getAllAffectations() {
         List<Affectation> affectations = affectationService.getAllAffectations();
@@ -35,7 +34,6 @@ public class AffectationController {
                 .collect(Collectors.toList());
     }
 
-    // GET par ID composé
     @GetMapping("/{employeId}/{phaseId}")
     public ResponseEntity<AffectationDTO> getAffectationById(
             @PathVariable int employeId,
@@ -46,19 +44,32 @@ public class AffectationController {
         return ResponseEntity.ok(affectationMapper.toDto(affectation));
     }
 
-    // POST créer une affectation
     @PostMapping
-    public ResponseEntity<AffectationDTO> createAffectation(@RequestBody AffectationDTO dto) {
+    public ResponseEntity<?> createAffectation(@RequestBody AffectationDTO dto) {
+        System.out.println("=== CREATE AFFECTATION ===");
+        System.out.println("employeId: " + dto.getEmployeId());
+        System.out.println("phaseId: " + dto.getPhaseId());
+
+        if (dto == null) {
+            System.out.println("DTO est null");
+            return ResponseEntity.badRequest().body("DTO null");
+        }
+
+        System.out.println("employeId: " + dto.getEmployeId());
+        System.out.println("phaseId: " + dto.getPhaseId());
+        System.out.println("dateDebut: " + dto.getDateDebut());
+        System.out.println("dateFin: " + dto.getDateFin());
+
         try {
             Affectation affectation = affectationMapper.toEntity(dto);
             Affectation saved = affectationService.saveAffectation(affectation);
             return new ResponseEntity<>(affectationMapper.toDto(saved), HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
-    // PUT modifier une affectation
     @PutMapping("/{employeId}/{phaseId}")
     public ResponseEntity<AffectationDTO> updateAffectation(
             @PathVariable int employeId,
@@ -73,7 +84,6 @@ public class AffectationController {
         return ResponseEntity.ok(affectationMapper.toDto(updated));
     }
 
-    // DELETE supprimer une affectation
     @DeleteMapping("/{employeId}/{phaseId}")
     public ResponseEntity<Void> deleteAffectation(
             @PathVariable int employeId,
@@ -83,7 +93,6 @@ public class AffectationController {
         return ResponseEntity.noContent().build();
     }
 
-    // GET affectations par phase
     @GetMapping("/phase/{phaseId}")
     public List<AffectationDTO> getAffectationsByPhase(@PathVariable Long phaseId) {
         List<Affectation> affectations = affectationService.getAffectationsByPhase(phaseId);
@@ -92,7 +101,6 @@ public class AffectationController {
                 .collect(Collectors.toList());
     }
 
-    // GET affectations par employé
     @GetMapping("/employe/{employeId}")
     public List<AffectationDTO> getAffectationsByEmploye(@PathVariable Long employeId) {
         List<Affectation> affectations = affectationService.getAffectationsByEmploye(employeId);
@@ -101,12 +109,16 @@ public class AffectationController {
                 .collect(Collectors.toList());
     }
 
-    // GET vérifier disponibilité employé
     @GetMapping("/disponible/{employeId}")
     public ResponseEntity<Boolean> isEmployeDisponible(
             @PathVariable Long employeId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDebut,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin) {
         return ResponseEntity.ok(affectationService.isEmployeDisponible(employeId, dateDebut, dateFin));
+    }
+    @PostMapping("/test")
+    public ResponseEntity<?> test() {
+        System.out.println("=== TEST ENDPOINT APPELE ===");
+        return ResponseEntity.ok("Test réussi");
     }
 }

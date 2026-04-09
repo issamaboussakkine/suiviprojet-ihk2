@@ -1,31 +1,30 @@
 package ma.projet.ihk.suiviprojet_ihk.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
-
-  // Représente un employé de l'entreprise.
- // Chaque employé possède un profil qui détermine ses permissions.
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name = "employe")
-@Data @NoArgsConstructor @AllArgsConstructor
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Employe {
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private int id;
 
-  // Identifiant RH unique de l'employé
-  private String matricule;
+  private String login;
+  private String email;
+  private String password;
   private String nom;
   private String prenom;
+  private String matricule;
   private String telephone;
-  private String email;
 
-  //  Identifiants de connexion à l'application
-  private String login;
-  private String password;
-
-  // Profil fonctionnel → détermine les droits
   @ManyToOne
   @JoinColumn(name = "profil_id")
   private Profil profil;
+
+  // Les getters et setters sont générés par Lombok (@Data)
 }

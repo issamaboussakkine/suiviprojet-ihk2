@@ -8,7 +8,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: suiviprojet_ihk
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
@@ -18,18 +18,30 @@ services:
     networks:
       - suiviprojet-network
 
-  app:
+  backend:
     build: .
-    container_name: suiviprojet-app
+    container_name: suiviprojet-backend
     ports:
       - "8081:8081"
     depends_on:
       mysql:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/suiviprojet_ihk?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/suiviprojet_ihk
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - suiviprojet-network
+
+  frontend:
+    build: ./frontend
+    container_name: suiviprojet-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:8081/api
     networks:
       - suiviprojet-network
 
