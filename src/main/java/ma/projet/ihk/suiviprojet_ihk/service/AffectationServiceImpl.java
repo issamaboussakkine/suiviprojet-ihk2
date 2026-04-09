@@ -27,12 +27,25 @@ public class AffectationServiceImpl implements AffectationService {
 
     @Override
     public Affectation saveAffectation(Affectation affectation) {
-        // Vérifier que l'employé est disponible sur la période
-        if (!isEmployeDisponible(
-                Long.valueOf(affectation.getEmploye().getId()),
-                affectation.getDateDebut(),
-                affectation.getDateFin())) {
-            throw new RuntimeException("L'employé n'est pas disponible sur cette période");
+        // Récupérer l'employé et la phase à partir des IDs
+        if (affectation.getId() != null) {
+            Optional<Employe> employeOpt = employeRepository.findById(affectation.getId().getEmployeId());
+            if (employeOpt.isPresent()) {
+                affectation.setEmploye(employeOpt.get());
+            }
+
+            Optional<Phase> phaseOpt = phaseRepository.findById(affectation.getId().getPhaseId());
+            if (phaseOpt.isPresent()) {
+                affectation.setPhase(phaseOpt.get());
+            }
+
+            // Vérifier que l'employé est disponible sur la période
+            if (!isEmployeDisponible(
+                    Long.valueOf(affectation.getId().getEmployeId()),
+                    affectation.getDateDebut(),
+                    affectation.getDateFin())) {
+                throw new RuntimeException("L'employé n'est pas disponible sur cette période");
+            }
         }
         return affectationRepository.save(affectation);
     }
@@ -73,8 +86,7 @@ public class AffectationServiceImpl implements AffectationService {
 
     @Override
     public boolean isEmployeAffectePhase(Long employeId, Long phaseId) {
-        AffectationId id = new AffectationId(employeId.intValue(), phaseId.intValue());        // Note: Vous devrez peut-être adapter selon comment AffectationId est construit
-        // Cette méthode dépend de la structure exacte de votre AffectationId
+        AffectationId id = new AffectationId(employeId.intValue(), phaseId.intValue());
         return affectationRepository.existsById(id);
     }
 
@@ -86,10 +98,9 @@ public class AffectationServiceImpl implements AffectationService {
             LocalDate debutExistant = affectation.getDateDebut();
             LocalDate finExistant = affectation.getDateFin();
 
-            // Vérifier chevauchement de périodes
             if (debutExistant != null && finExistant != null) {
                 if (!(dateFin.isBefore(debutExistant) || dateDebut.isAfter(finExistant))) {
-                    return false; // Chevauchement détecté
+                    return false;
                 }
             }
         }

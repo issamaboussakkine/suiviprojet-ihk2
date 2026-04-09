@@ -10,8 +10,10 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private final long EXPIRATION_TIME = 86400000; // 24 heures
+
+    private final String SECRET_KEY = "votreCleSecreteLongueDeAuMoins32CaracteresPourHS256";
+    private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    private final long EXPIRATION_TIME = 86400000;
 
     public String generateToken(String login, String role) {
         return Jwts.builder()

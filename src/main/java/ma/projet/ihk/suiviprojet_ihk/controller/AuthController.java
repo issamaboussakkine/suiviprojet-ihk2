@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -27,25 +26,15 @@ public class AuthController {
         String password = loginRequest.get("password");
 
         Employe employe = employeService.authentifier(login, password);
+
         if (employe != null) {
-            String token = jwtUtil.generateToken(employe.getLogin(), employe.getProfil().getCode());
+            String token = jwtUtil.generateToken(employe.getLogin(), "ADMIN");
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
-            response.put("id", employe.getId());
             response.put("login", employe.getLogin());
-            response.put("nom", employe.getNom());
-            response.put("prenom", employe.getPrenom());
-            response.put("role", employe.getProfil().getCode());
+            response.put("role", "ADMIN");
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.status(401).body("Login ou mot de passe incorrect");
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.substring(7);
-        String login = jwtUtil.extractLogin(token);
-        Optional<Employe> employe = employeService.getEmployeByLogin(login);
-        return employe.map(ResponseEntity::ok).orElse(ResponseEntity.status(404).build());
     }
 }

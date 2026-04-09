@@ -13,7 +13,7 @@ public class AffectationDTO {
     private int phaseId;
     private LocalDate dateDebut;
     private LocalDate dateFin;
-    private String employeNom;           // Nom de l'employé
-    private String phaseLibelle;          // Nom de la phase
-    private String projetNom;             // Nom du projet
+    private String employeNom;
+    private String phaseLibelle;
+    private String projetNom;
 }
