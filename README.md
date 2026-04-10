@@ -1,100 +1,133 @@
-# 🧾 Suivi de Projet IHK      
+# 🧾 Suivi de Projet IHK
 
 ![Java](https://img.shields.io/badge/Java-17-blue)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-green)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen)
 ![React](https://img.shields.io/badge/React-18-blue)
 ![MySQL](https://img.shields.io/badge/MySQL-8-orange)
 ![Docker](https://img.shields.io/badge/Docker-✓-blue)
+![JWT](https://img.shields.io/badge/Auth-JWT-black)
 
-Application web complète de gestion de projets développée avec :
+Application web complète de **gestion de projets** permettant la planification, le suivi et la gestion financière des projets avec un système d'authentification sécurisé et gestion des rôles.
 
-####  ⚙️ Backend : Spring Boot
-####  🎨 Frontend : React (Vite + Tailwind)
-####  🔐 Sécurité : JWT + Spring Security
-####  🗄️ Base de données : MySQL
+---
 
-## 🏗️ Architecture
+# 📌 Aperçu du Projet
 
-[React] ⇄ [Spring Boot] ⇄ [MySQL]
+- ⚙️ **Backend** : Spring Boot (API REST)
+- 🎨 **Frontend** : React (Vite + TailwindCSS)
+- 🔐 **Sécurité** : JWT + Spring Security
+- 🗄️ **Base de données** : MySQL
+- 🐳 **Déploiement** : Docker & Docker Compose
 
-  (port 3000)  (port 8081)   (port 3306)
+---
+
+# 🏗️ Architecture
+
+<img width="2752" height="1428" alt="readme" src="https://github.com/user-attachments/assets/cc5ce9d2-93f9-438f-858a-5834fae9abf8" />
+
+
+---
+
+# 🚀 Fonctionnalités
+
+## 🔹 Backend (Spring Boot)
+
+- ✅ API REST complète (CRUD)
+- ✅ Architecture en couches (Controller / Service / Repository)
+- ✅ Validation des données
+- ✅ Gestion des exceptions
+- ✅ Authentification JWT
+- ✅ Autorisation basée sur les rôles
+- ✅ Spring Security
+
+---
+
+## 🔹 Frontend (React)
+
+- 🎨 Interface moderne avec TailwindCSS
+- 🔐 Routing sécurisé
+- 🔄 Appels API avec Axios
+- 👤 Gestion des rôles utilisateurs
+- 📊 Dashboard dynamique
+- 📝 Pages CRUD complètes
+- 🚫 Routes protégées
+
+### Routes sécurisées
+
+- `PrivateRoute` : utilisateur connecté
+- `RoleRoute` : accès selon rôle
+
+---
+
+# 🔐 Authentification & Sécurité
+
+- Login sécurisé avec JWT
+- Génération de Token
+- Stockage du token
+- Intercepteur Axios
+- Protection des routes
+- Gestion des permissions
+
+---
+
+# 🗄️ Base de Données
+
+## 📊 Modèle Entité-Relation
      
-🚀 Fonctionnalités principales
-🔹 Backend
-API REST complète (CRUD)
-
-## 🗄️ Base de Données
-
-### Entités
-
 <img width="1625" height="593" alt="Screenshot 2026-04-10 140601" src="https://github.com/user-attachments/assets/4ee3ea11-cec5-49b0-9ba2-ff8a3abc39a5" />
 
+---
 
-🔹 Frontend
-Interface moderne avec React
+# 👥 Gestion des Accès & Rôles
 
-Routing sécurisé
+L'application implémente un système de gestion des permissions basé sur les rôles :
 
-Appels API avec Axios
+| Rôle | Description |
+|------|-------------|
+| 👑 ADMIN | Gestion complète du système |
+| 📊 DIRECTEUR | Supervision globale des projets |
+| 🛠️ CHEF_PROJET | Gestion opérationnelle des projets |
+| 💰 COMPTABLE | Gestion financière |
+| 🗂️ SECRETAIRE | Support administratif |
 
-Gestion des rôles (Admin, Comptable, etc.)
+<img width="1503" height="548" alt="Screenshot 2026-04-10 160012" src="https://github.com/user-attachments/assets/6f75f5e4-9376-46c3-b1ed-9891c2145ce1" />
 
-Dashboard + pages CRUD
+---
 
-🔐 Authentification
-Login avec JWT
+# 🧪 Démo vidéo
 
-Stockage du token
-Routes protégées :
-
-PrivateRoute
-
-RoleRoute
-
-Gestion des rôles :
-
-ADMIN
-
-SECRETAIRE
-
-DIRECTEUR
-
-CHEF_PROJET
-
-COMPTABLE
-
-
-🧪 Démo vidéo
-
-🎥 Voir la démonstration complète :
+## 🎥 Voir la démonstration complète :
 
 
 https://github.com/user-attachments/assets/6b547df4-eb9e-4adf-86f8-1dad27e4442a
 
+---
 
+# 🐳 Orchestration Docker – React, Spring Boot et MySQL
 
-Orchestration Docker – React, Spring Boot et MySQL
-
-1. Se placer dans le dossier du projet
+ ## 1️⃣  Se placer dans le dossier du projet
  
 cd suiviprojet-ihk2
 
- 2. Lancer avec Docker Compose:
+ ## 2️⃣ Lancer avec Docker Compose
  
         docker-compose up --build
 
+---
+
 📁 Structure du projet
 
-backend/
+## 🔹 Backend
 
 <img width="613" height="592" alt="image" src="https://github.com/user-attachments/assets/7531a3d6-2177-4192-ae67-0d43bd5efd54" />
 
-frontend/
+## 🔹 Frontend
 
 <img width="619" height="754" alt="image" src="https://github.com/user-attachments/assets/4a48f5e2-b3ad-4613-b0ae-82bd09e574f8" />
 
+---
 
-📊 Visualisation des tables MySQL (Docker)
+# 📊 Visualisation des tables MySQL (Docker)
 
 Pour afficher les tables de la base de données MySQL dans le conteneur Docker, utilisez la commande suivante :
 
@@ -103,14 +136,15 @@ Pour afficher les tables de la base de données MySQL dans le conteneur Docker, 
 
 <img width="1446" height="426" alt="image" src="https://github.com/user-attachments/assets/c176d199-f907-4df9-8b37-f6c00b4d5f08" />
 
+---
 
-📌 Auteurs
+# 👨‍💻 Auteurs
 
-👤 Issam Aboussakkine
-👤 Hafsa Ajabboune
-👤 Khadija Bouraiss
+- 👤 Issam Aboussakkine  
+- 👤 Hafsa Ajabboune  
+- 👤 Khadija Bouraiss  
 
-🎓 Étudiants à la FST Marrakech
+🎓 Étudiants à la Faculté des Sciences et Techniques de Marrakech
 
 
 
