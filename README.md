@@ -23,29 +23,12 @@ Application web complète de gestion de projets développée avec :
 🔹 Backend
 API REST complète (CRUD)
 
-Gestion des entités :
+## 🗄️ Base de Données
 
-Organismes
+### Entités
 
-Employés
+<img width="1625" height="593" alt="Screenshot 2026-04-10 140601" src="https://github.com/user-attachments/assets/4ee3ea11-cec5-49b0-9ba2-ff8a3abc39a5" />
 
-Projets
-
-Phases
-
-Affectations
-
-Livrables
-
-Documents
-
-Factures
-
-Reporting (dashboard)
-
-Validation et gestion des exceptions
-
-Authentification JWT + rôles
 
 🔹 Frontend
 Interface moderne avec React
