@@ -1,4 +1,10 @@
-🧾 Suivi de Projet IHK
+🧾 Suivi de Projet IHK      
+
+![Java](https://img.shields.io/badge/Java-17-blue)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-green)
+![React](https://img.shields.io/badge/React-18-blue)
+![MySQL](https://img.shields.io/badge/MySQL-8-orange)
+![Docker](https://img.shields.io/badge/Docker-✓-blue)
 
 Application web complète de gestion de projets développée avec :
 
@@ -7,6 +13,12 @@ Application web complète de gestion de projets développée avec :
 🔐 Sécurité : JWT + Spring Security
 🗄️ Base de données : MySQL
 
+## 🏗️ Architecture
+
+[React] ⇄ [Spring Boot] ⇄ [MySQL]
+
+  (port 3000)  (port 8081)   (port 3306)
+     
 🚀 Fonctionnalités principales
 🔹 Backend
 API REST complète (CRUD)
@@ -74,6 +86,9 @@ COMPTABLE
 🎥 Voir la démonstration complète :
 
 
+https://github.com/user-attachments/assets/6b547df4-eb9e-4adf-86f8-1dad27e4442a
+
+
 
 Orchestration Docker – React, Spring Boot et MySQL
 
@@ -83,7 +98,7 @@ cd suiviprojet-ihk2
 
  2. Lancer avec Docker Compose:
  
-docker-compose up --build
+        docker-compose up --build
 
 📁 Structure du projet
 
@@ -94,6 +109,17 @@ backend/
 frontend/
 
 <img width="619" height="754" alt="image" src="https://github.com/user-attachments/assets/4a48f5e2-b3ad-4613-b0ae-82bd09e574f8" />
+
+
+📊 Visualisation des tables MySQL (Docker)
+
+Pour afficher les tables de la base de données MySQL dans le conteneur Docker, utilisez la commande suivante :
+
+      docker exec -it suiviprojet-mysql mysql -uroot -proot -e "USE suiviprojet_ihk; SHOW TABLES;"
+
+
+<img width="1446" height="426" alt="image" src="https://github.com/user-attachments/assets/c176d199-f907-4df9-8b37-f6c00b4d5f08" />
+
 
 📌 Auteurs
 
