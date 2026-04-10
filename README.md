@@ -23,7 +23,7 @@ Application web complète de **gestion de projets** permettant la planification,
 
 # 🏗️ Architecture
 
-<img width="1024" height="549" alt="image" src="https://github.com/user-attachments/assets/b7507984-1e3c-4464-9872-9793fbd84728" />
+<img width="1024" height="549" alt="image" src="https://github.com/user-attachments/assets/0f30e4d5-3757-4ce5-a602-0dccbf1b5386" />
 
 
 ---
