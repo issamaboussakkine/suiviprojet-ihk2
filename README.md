@@ -1,4 +1,4 @@
-🧾 Suivi de Projet IHK      
+# 🧾 Suivi de Projet IHK      
 
 ![Java](https://img.shields.io/badge/Java-17-blue)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-green)
@@ -8,10 +8,10 @@
 
 Application web complète de gestion de projets développée avec :
 
-⚙️ Backend : Spring Boot
-🎨 Frontend : React (Vite + Tailwind)
-🔐 Sécurité : JWT + Spring Security
-🗄️ Base de données : MySQL
+####  ⚙️ Backend : Spring Boot
+####  🎨 Frontend : React (Vite + Tailwind)
+####  🔐 Sécurité : JWT + Spring Security
+####  🗄️ Base de données : MySQL
 
 ## 🏗️ Architecture
 
