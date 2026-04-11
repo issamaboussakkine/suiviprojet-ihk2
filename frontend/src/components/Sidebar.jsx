@@ -8,22 +8,26 @@ import { useAuthStore } from '../store/useAuthStore';
 
 const Sidebar = () => {
   const { user } = useAuthStore();
-  const role = user?.role;
+  
+  // Extraction sûre du rôle (garantit que ce soit une string)
+  const roleName = typeof user?.role === 'object' ? (user?.role?.code || user?.role?.libelle || '') : (user?.role || '');
+  const normalizedRole = roleName.toUpperCase();
 
   const NAV_ITEMS = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'SECRETAIRE', 'DIRECTEUR', 'CHEF_PROJET', 'COMPTABLE'] },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'SECRETAIRE', 'DIRECTEUR', 'CHEF_PROJET', 'COMPTABLE', 'COLLABORATEUR'] },
     { name: 'Organismes', path: '/organismes', icon: Building2, roles: ['ADMIN', 'SECRETAIRE'] },
     { name: 'Employés', path: '/employes', icon: Users, roles: ['ADMIN'] },
     { name: 'Projets', path: '/projets', icon: Briefcase, roles: ['ADMIN', 'SECRETAIRE', 'CHEF_PROJET'] },
     { name: 'Phases', path: '/phases', icon: Layers, roles: ['ADMIN', 'CHEF_PROJET'] },
     { name: 'Affectations', path: '/affectations', icon: LinkIcon, roles: ['ADMIN', 'CHEF_PROJET'] },
-    { name: 'Livrables', path: '/livrables', icon: CheckSquare, roles: ['ADMIN', 'CHEF_PROJET'] },
+    { name: 'Livrables', path: '/livrables', icon: CheckSquare, roles: ['ADMIN', 'CHEF_PROJET', 'COLLABORATEUR'] },
     { name: 'Documents', path: '/documents', icon: FileText, roles: ['ADMIN', 'CHEF_PROJET'] },
     { name: 'Factures', path: '/factures', icon: CreditCard, roles: ['ADMIN', 'COMPTABLE'] },
     { name: 'Reporting', path: '/reporting', icon: PieChart, roles: ['ADMIN', 'DIRECTEUR'] },
   ];
 
-  const filteredNav = NAV_ITEMS.filter(item => item.roles.includes(role) || item.roles.includes('ALL'));
+  // Si on n'a pas de rôle défini (ex: non connecté), on ne montre rien
+  const filteredNav = normalizedRole ? NAV_ITEMS.filter(item => item.roles.includes(normalizedRole) || item.roles.includes('ALL')) : [];
 
   return (
     <div className="h-full w-full bg-theme-card border-r border-theme-border flex flex-col transition-colors duration-200">

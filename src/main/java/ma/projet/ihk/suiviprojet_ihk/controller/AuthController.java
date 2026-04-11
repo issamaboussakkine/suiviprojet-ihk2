@@ -28,11 +28,18 @@ public class AuthController {
         Employe employe = employeService.authentifier(login, password);
 
         if (employe != null) {
-            String token = jwtUtil.generateToken(employe.getLogin(), "ADMIN");
+            // Extraction statique et sécurisée du libellé du rôle
+            String roleStr = "USER";
+            if (employe.getProfil() != null && employe.getProfil().getLibelle() != null) {
+                roleStr = employe.getProfil().getLibelle().toUpperCase().replace(" ", "_").replace("-", "_");
+            }
+
+            String token = jwtUtil.generateToken(employe.getLogin(), roleStr);
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
             response.put("login", employe.getLogin());
-            response.put("role", "ADMIN");
+            response.put("role", employe.getProfil()); // On retourne l'objet profil en entier pour le Frontend
+            
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.status(401).body("Login ou mot de passe incorrect");

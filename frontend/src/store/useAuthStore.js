@@ -25,11 +25,19 @@ export const useAuthStore = create(
       checkRole: (roles) => {
         const state = useAuthStore.getState();
         if (!state.user || !state.user.role) return false;
+        
+        // Sécuriser au cas où un vieil objet resterait dans le localStorage
+        const userRole = typeof state.user.role === 'object' 
+            ? (state.user.role.code || state.user.role.libelle || '') 
+            : state.user.role;
+            
+        const cleanRole = userRole.toUpperCase();
+
         // Roles can be a single string or an array of strings
         if (Array.isArray(roles)) {
-          return roles.includes(state.user.role);
+          return roles.includes(cleanRole);
         }
-        return state.user.role === roles;
+        return cleanRole === roles.toUpperCase();
       },
       
       updateUser: (userData) =>

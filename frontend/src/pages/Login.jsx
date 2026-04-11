@@ -26,12 +26,23 @@ export default function Login() {
             const data = await response.json();
 
             if (response.ok && data.token) {
+                // Extraction robuste du code du rôle (chaîne de caractères) pour éviter "Objects are not valid as a React child"
+                let roleString = 'USER';
+                if (data.role) {
+                    if (typeof data.role === 'object') {
+                        roleString = data.role.code || data.role.libelle || 'USER';
+                    } else {
+                        roleString = data.role;
+                    }
+                }
+                roleString = roleString.toUpperCase();
+
                 const userData = {
                     id: data.id,
                     login: data.login,
                     nom: data.nom,
                     prenom: data.prenom,
-                    role: data.role
+                    role: roleString
                 };
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(userData));

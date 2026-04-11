@@ -43,8 +43,11 @@ function App() {
               <Route element={<RoleRoute roles={['ADMIN', 'CHEF_PROJET']} />}>
                  <Route path="/phases" element={<Phases />} />
                  <Route path="/affectations" element={<Affectations />} />
-                 <Route path="/livrables" element={<Livrables />} />
                  <Route path="/documents" element={<Documents />} />
+              </Route>
+
+              <Route element={<RoleRoute roles={['ADMIN', 'CHEF_PROJET', 'COLLABORATEUR']} />}>
+                 <Route path="/livrables" element={<Livrables />} />
               </Route>
 
               <Route element={<RoleRoute roles={['ADMIN', 'COMPTABLE']} />}>

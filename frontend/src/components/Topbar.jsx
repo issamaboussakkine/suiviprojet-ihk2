@@ -48,7 +48,9 @@ const Topbar = () => {
         >
           <div className="flex flex-col text-right">
             <span className="text-sm font-medium text-theme-text">{user?.nom} {user?.prenom}</span>
-            <span className="text-xs text-theme-textSec font-bold">{user?.role}</span>
+            <span className="text-xs text-theme-textSec font-bold">
+              {typeof user?.role === 'object' ? (user.role.code || user.role.libelle) : user?.role}
+            </span>
           </div>
           <div className="w-10 h-10 rounded-full bg-theme-card flex items-center justify-center border border-theme-border text-theme-text transition-colors">
             <UserIcon size={20} />
