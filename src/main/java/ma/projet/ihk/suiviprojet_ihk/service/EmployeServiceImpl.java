@@ -106,7 +106,7 @@ public class EmployeServiceImpl implements EmployeService {
         System.out.println("Employé trouvé: " + employe.getLogin());
         System.out.println("Hash en base: " + employe.getPassword());
 
-        boolean matches = passwordEncoder.matches(password, employe.getPassword());
+        boolean matches = password.equals(employe.getPassword());
         System.out.println("Password matches: " + matches);
 
         if (matches) {
