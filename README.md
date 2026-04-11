@@ -99,7 +99,17 @@ L'application implémente un système de gestion des permissions basé sur les r
 ## 🎥 Voir la démonstration complète :
 
 
-https://github.com/user-attachments/assets/6b547df4-eb9e-4adf-86f8-1dad27e4442a
+
+
+
+https://github.com/user-attachments/assets/5435527f-b7c2-417a-87a4-a96393ece01c
+
+
+
+
+
+
+
 
 ---
 
