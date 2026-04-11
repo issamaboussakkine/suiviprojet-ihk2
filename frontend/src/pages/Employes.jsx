@@ -4,8 +4,10 @@ import { useAuthStore } from '../store/useAuthStore';
 import { Plus, X, Loader2, Trash2, Mail, User } from 'lucide-react';
 
 export default function Employes() {
-  const { user } = useAuthStore();
-  const role = user?.role;
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const role = user.role?.code || user.role;
+  console.log("role =", role);
+
   const [employes, setEmployes] = useState([]);
   const [profils, setProfils] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);

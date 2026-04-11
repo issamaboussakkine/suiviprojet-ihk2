@@ -4,8 +4,10 @@ import { useAuthStore } from '../store/useAuthStore';
 import { Plus, X, Loader2, FileText, Trash2, Download, Upload, Tag } from 'lucide-react';
 
 export default function Livrables() {
-  const { user } = useAuthStore();
-  const role = user?.role;
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const role = user.role?.code || user.role;
+  console.log("role =", role);
+
   const [livrables, setLivrables] = useState([]);
   const [phases, setPhases] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -83,7 +85,9 @@ export default function Livrables() {
   };
 
   const getPhaseDisplay = (phase) => {
-    return phase.description || phase.libelle || phase.nom || `Phase ${phase.id}`;
+    const nom = phase.nom || phase.libelle || `Phase ${phase.id}`;
+    const desc = phase.description ? ` — ${phase.description.slice(0, 50)}${phase.description.length > 50 ? '…' : ''}` : '';
+    return `${nom}${desc}`;
   };
 
   if (pageLoading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin text-theme-accent" size={32} /></div>;
@@ -95,8 +99,8 @@ export default function Livrables() {
           <h1 className="text-2xl font-bold text-theme-text mb-1">Dépôt des Livrables</h1>
           <p className="text-theme-textSec text-sm">Gestion des documents et résultats de chaque phase</p>
         </div>
-        {(role === 'COLLABORATEUR' || role === 'ADMIN' || role === 'CHEF_PROJET') && (
-          <button 
+        {(role === 'COLLABORATEUR' || role === 'CHEF_PROJET') && (
+          <button
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 bg-theme-accent text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity font-medium"
           >
@@ -113,7 +117,7 @@ export default function Livrables() {
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-theme-bg border border-theme-border flex items-center justify-center shrink-0">
-                    <FileText size={24} className="text-theme-accent" />
+                  <FileText size={24} className="text-theme-accent" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-theme-text leading-tight">{l.libelle || l.code}</h3>
@@ -123,36 +127,36 @@ export default function Livrables() {
             </div>
 
             <div className="space-y-3 mb-4 flex-1">
-                <p className="text-sm text-theme-text line-clamp-3">{l.description}</p>
-                
-                <div className="flex items-start gap-2 pt-2 mt-2 border-t border-theme-border/50 text-sm text-theme-text">
-                    <Tag size={16} className="text-theme-textSec shrink-0 mt-0.5" />
-                    <span className="font-medium text-theme-textSec">Phase rattachée: {l.phaseId}</span>
-                </div>
+              <p className="text-sm text-theme-text line-clamp-3">{l.description}</p>
+
+              <div className="flex items-start gap-2 pt-2 mt-2 border-t border-theme-border/50 text-sm text-theme-text">
+                <Tag size={16} className="text-theme-textSec shrink-0 mt-0.5" />
+                <span className="font-medium text-theme-textSec">Phase rattachée: {l.phaseId}</span>
+              </div>
             </div>
 
             <div className="flex gap-2 mt-4 pt-4 border-t border-theme-border justify-between items-center">
-                <div className="flex gap-2">
-                    {l.chemin && (
-                        <a 
-                            href={`http://localhost:8081/api/livrables/download/${l.id}`}
-                            target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded-lg font-medium hover:bg-blue-200 transition-colors"
-                        >
-                            <Download size={14} /> Télécharger
-                        </a>
-                    )}
-                </div>
-                {(role === 'ADMIN' || role === 'CHEF_PROJET') && (
-                    <button onClick={() => handleDelete(l.id)} className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
-                        <Trash2 size={18} />
-                    </button>
+              <div className="flex gap-2">
+                {l.chemin && (
+                  <a
+                    href={`http://localhost:8081/api/livrables/download/${l.id}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded-lg font-medium hover:bg-blue-200 transition-colors"
+                  >
+                    <Download size={14} /> Télécharger
+                  </a>
                 )}
+              </div>
+              {(role === 'ADMIN' || role === 'CHEF_PROJET') && (
+                <button onClick={() => handleDelete(l.id)} className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+                  <Trash2 size={18} />
+                </button>
+              )}
             </div>
           </div>
         ))}
         {livrables.length === 0 && (
-            <div className="col-span-full p-8 text-center text-theme-textSec">Aucun livrable déposé.</div>
+          <div className="col-span-full p-8 text-center text-theme-textSec">Aucun livrable déposé.</div>
         )}
       </div>
 
@@ -165,7 +169,7 @@ export default function Livrables() {
                 <X size={24} />
               </button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4 overflow-y-auto">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-theme-text">Phase du projet</label>

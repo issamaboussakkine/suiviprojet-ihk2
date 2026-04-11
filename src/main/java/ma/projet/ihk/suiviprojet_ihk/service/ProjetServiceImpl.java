@@ -121,46 +121,25 @@ public class ProjetServiceImpl implements ProjetService {
 
     @Override
     public Projet validerProjet(Long id) {
-        Optional<Projet> projetOpt = getProjetById(id);
-        if (projetOpt.isPresent()) {
-            Projet projet = projetOpt.get();
-            if (projet.getStatut() == null || "EN_ATTENTE".equals(projet.getStatut())) {
-                projet.setStatut("VALIDE");
-                return updateProjet(id, projet);
-            } else {
-                throw new RuntimeException("Le projet ne peut pas être validé (statut actuel: " + projet.getStatut() + ")");
-            }
-        }
-        throw new RuntimeException("Projet non trouvé avec l'ID: " + id);
+        Projet projet = getProjetById(id)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID: " + id));
+        projet.valider(); // utilise la méthode métier de l'entité (vérifie le statut EN_ATTENTE)
+        return saveProjet(projet);
     }
 
     @Override
     public Projet demarrerProjet(Long id) {
-        Optional<Projet> projetOpt = getProjetById(id);
-        if (projetOpt.isPresent()) {
-            Projet projet = projetOpt.get();
-            if ("VALIDE".equals(projet.getStatut())) {
-                projet.setStatut("EN_COURS");
-                return updateProjet(id, projet);
-            } else {
-                throw new RuntimeException("Le projet ne peut pas démarrer (statut actuel: " + projet.getStatut() + ")");
-            }
-        }
-        throw new RuntimeException("Projet non trouvé avec l'ID: " + id);
+        Projet projet = getProjetById(id)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID: " + id));
+        projet.demarrer(); // utilise la méthode métier de l'entité (vérifie le statut VALIDE)
+        return saveProjet(projet);
     }
 
     @Override
     public Projet terminerProjet(Long id) {
-        Optional<Projet> projetOpt = getProjetById(id);
-        if (projetOpt.isPresent()) {
-            Projet projet = projetOpt.get();
-            if ("EN_COURS".equals(projet.getStatut())) {
-                projet.setStatut("TERMINE");
-                return updateProjet(id, projet);
-            } else {
-                throw new RuntimeException("Seul un projet en cours peut être terminé (statut actuel: " + projet.getStatut() + ")");
-            }
-        }
-        throw new RuntimeException("Projet non trouvé avec l'ID: " + id);
+        Projet projet = getProjetById(id)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID: " + id));
+        projet.terminer(); // utilise la méthode métier de l'entité (vérifie le statut EN_COURS)
+        return saveProjet(projet);
     }
 }

@@ -5,10 +5,12 @@ import { Plus, X, Loader2, PlayCircle, CheckCircle, Trash2, Upload } from 'lucid
 import { useNavigate } from 'react-router-dom';
 
 export default function Phases() {
-  const { user } = useAuthStore();
-  const role = user?.role;
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const role = user.role?.code || user.role;
+  console.log("role =", role);
+
   const navigate = useNavigate();
-  
+
   const [phases, setPhases] = useState([]);
   const [projets, setProjets] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,8 +30,8 @@ export default function Phases() {
       const [phRes, prjRes] = await Promise.all([api.get('/phases'), api.get('/projets')]);
       setPhases(phRes.data);
       setProjets(prjRes.data);
-    } catch (error) { 
-      console.error(error); 
+    } catch (error) {
+      console.error(error);
     } finally {
       setPageLoading(false);
     }
@@ -83,8 +85,8 @@ export default function Phases() {
           <h1 className="text-2xl font-bold text-theme-text mb-1">Gestion des Phases</h1>
           <p className="text-theme-textSec text-sm">Suivi des étapes de chaque projet</p>
         </div>
-        {(role === 'ADMIN' || role === 'CHEF_PROJET') && (
-          <button 
+        {(role === 'CHEF_PROJET') && (
+          <button
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 bg-theme-accent text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity font-medium"
           >
@@ -99,56 +101,57 @@ export default function Phases() {
         {phases.map(p => {
           const currentStatut = p.statut || (p.etatRealisation ? 'TERMINEE' : 'NON_COMMENCEE');
           return (
-          <div key={p.id} className="bg-theme-card rounded-xl border border-theme-border p-5 flex flex-col justify-between transition-colors duration-200">
-            <div>
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-lg font-bold text-theme-text">{p.nom}</h3>
-                  <p className="text-xs text-theme-textSec mt-1 line-clamp-2">{p.description}</p>
+            <div key={p.id} className="bg-theme-card rounded-xl border border-theme-border p-5 flex flex-col justify-between transition-colors duration-200">
+              <div>
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-theme-text">{p.nom}</h3>
+                    <p className="text-xs text-theme-textSec mt-1 line-clamp-2">{p.description}</p>
+                  </div>
+                  {getStatusBadge(p)}
                 </div>
-                {getStatusBadge(p)}
-              </div>
-              
-              <div className="bg-theme-bg p-3 rounded-lg border border-theme-border mb-4">
+
+                <div className="bg-theme-bg p-3 rounded-lg border border-theme-border mb-4">
                   <p className="text-xs text-theme-textSec mb-1">Projet rattaché</p>
                   <p className="text-sm font-medium text-theme-text">{p.projet?.nom || `ID: ${p.projet_id || p.projet?.id}`}</p>
-              </div>
+                </div>
 
-              <div className="flex justify-between items-center mb-4">
-                 <div>
+                <div className="flex justify-between items-center mb-4">
+                  <div>
                     <p className="text-xs text-theme-textSec">Budget Phase</p>
                     <p className="font-bold text-theme-text">{p.montant?.toLocaleString()} MAD</p>
-                 </div>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div className="flex gap-2 mt-4 pt-4 border-t border-theme-border justify-between items-center">
+              <div className="flex gap-2 mt-4 pt-4 border-t border-theme-border justify-between items-center">
                 <div className="flex gap-2 flex-wrap">
-                    {role === 'COLLABORATEUR' && currentStatut === 'NON_COMMENCEE' && (
+                  {role === 'COLLABORATEUR' && currentStatut === 'NON_COMMENCEE' && (
                     <button onClick={() => updateStatus(p, 'EN_COURS')} className="flex items-center gap-1 text-xs px-3 py-1.5 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded-lg font-medium hover:bg-blue-200 transition-colors">
-                        <PlayCircle size={14} /> Démarrer
+                      <PlayCircle size={14} /> Démarrer
                     </button>
-                    )}
-                    
-                    {role === 'COLLABORATEUR' && currentStatut === 'EN_COURS' && (
+                  )}
+
+                  {role === 'COLLABORATEUR' && currentStatut === 'EN_COURS' && (
                     <>
                       <button onClick={() => updateStatus(p, 'TERMINEE', true)} className="flex items-center gap-1 text-xs px-3 py-1.5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 rounded-lg font-medium hover:bg-green-200 transition-colors">
-                          <CheckCircle size={14} /> Terminer
+                        <CheckCircle size={14} /> Terminer
                       </button>
                       <button onClick={() => navigate('/livrables')} className="flex items-center gap-1 text-xs px-3 py-1.5 bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 rounded-lg font-medium hover:bg-purple-200 transition-colors">
-                          <Upload size={14} /> Livrable
+                        <Upload size={14} /> Livrable
                       </button>
                     </>
-                    )}
+                  )}
                 </div>
                 {(role === 'ADMIN' || role === 'CHEF_PROJET') && (
-                    <button onClick={() => handleDelete(p.id)} className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
-                        <Trash2 size={18} />
-                    </button>
+                  <button onClick={() => handleDelete(p.id)} className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+                    <Trash2 size={18} />
+                  </button>
                 )}
+              </div>
             </div>
-          </div>
-        )})}
+          )
+        })}
       </div>
 
       {isModalOpen && (
@@ -160,7 +163,7 @@ export default function Phases() {
                 <X size={24} />
               </button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4 overflow-y-auto">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-theme-text">Projet</label>

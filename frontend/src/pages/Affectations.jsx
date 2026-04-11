@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { useAuthStore } from '../store/useAuthStore';
-import { Plus, X, Loader2, Link as LinkIcon, Trash2, Calendar, User, Tag } from 'lucide-react';
+import { Plus, X, Loader2, Link as LinkIcon, Trash2, Calendar, User, Tag, Building2 } from 'lucide-react';
 
 export default function Affectations() {
-  const { user } = useAuthStore();
-  const role = user?.role;
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const role = user.role?.code || user.role;
+  console.log("role =", role);
+
   const [affectations, setAffectations] = useState([]);
   const [employes, setEmployes] = useState([]);
   const [phases, setPhases] = useState([]);
@@ -26,6 +27,7 @@ export default function Affectations() {
   const fetchAffectations = async () => {
     try {
       const response = await api.get('/affectations');
+      console.log("Affectations reçues:", response.data);
       setAffectations(response.data);
     } catch (error) {
       console.error('Erreur chargement affectations:', error);
@@ -74,7 +76,10 @@ export default function Affectations() {
   };
 
   const getPhaseDisplay = (phase) => {
-    return phase.description || phase.libelle || phase.nom || `Phase ${phase.id}`;
+    const nom = phase.libelle || phase.nom || `Phase ${phase.id}`;
+    const desc = phase.description ? ` — ${phase.description.slice(0, 50)}${phase.description.length > 50 ? '…' : ''}` : '';
+    const montant = phase.montant ? ` (${phase.montant.toLocaleString()} MAD)` : '';
+    return `${nom}${desc}${montant}`;
   };
 
   const getEmployeDisplay = (emp) => {
@@ -93,8 +98,8 @@ export default function Affectations() {
           <h1 className="text-2xl font-bold text-theme-text mb-1">Affectations</h1>
           <p className="text-theme-textSec text-sm">Organisez les assignations des ressources aux phases du projet</p>
         </div>
-        {(role === 'ADMIN' || role === 'CHEF_PROJET') && (
-          <button 
+        {(role === 'CHEF_PROJET') && (
+          <button
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 bg-theme-accent text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity font-medium"
           >
@@ -111,40 +116,42 @@ export default function Affectations() {
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-theme-bg border border-theme-border flex items-center justify-center shrink-0">
-                    <LinkIcon size={24} className="text-theme-accent" />
+                  <LinkIcon size={24} className="text-theme-accent" />
                 </div>
                 <div>
-                  <h3 className="flex items-center gap-1.5 text-lg font-bold text-theme-text"><User size={16} />{aff.employeNom || `Employé ${aff.employeId}`}</h3>
+                  <h3 className="flex items-center gap-1.5 text-lg font-bold text-theme-text">
+                    <User size={16} />{aff.employeNom || aff.employePrenom || `Employé ${aff.employeId}`}
+                  </h3>
                 </div>
               </div>
             </div>
 
             <div className="space-y-3 mb-4 flex-1">
-                <div className="flex items-start gap-2 text-sm text-theme-text">
-                    <Tag size={16} className="text-theme-textSec shrink-0 mt-0.5" />
-                    <span className="line-clamp-2 font-medium">{aff.phaseLibelle || `Phase ${aff.phaseId}`}</span>
-                </div>
-                <div className="flex items-start gap-2 text-sm text-theme-text">
-                    <Building2 size={16} className="text-theme-textSec shrink-0 mt-0.5" />
-                    <span>{aff.projetNom || `Projet ID: ${aff.projetId || 'Inconnu'}`}</span>
-                </div>
-                <div className="flex flex-col gap-1 mt-2 pt-2 border-t border-theme-border/50 text-sm font-medium text-theme-textSec">
-                    <div className="flex items-center gap-2"><Calendar size={14} /> Début: <span className="text-theme-text">{aff.dateDebut}</span></div>
-                    <div className="flex items-center gap-2"><Calendar size={14} /> Fin: <span className="text-theme-text">{aff.dateFin}</span></div>
-                </div>
+              <div className="flex items-start gap-2 text-sm text-theme-text">
+                <Tag size={16} className="text-theme-textSec shrink-0 mt-0.5" />
+                <span className="line-clamp-2 font-medium">{aff.phaseLibelle || `Phase ${aff.phaseId}`}</span>
+              </div>
+              <div className="flex items-start gap-2 text-sm text-theme-text">
+                <Building2 size={16} className="text-theme-textSec shrink-0 mt-0.5" />
+                <span>{aff.projetNom || `Projet ${aff.projetId || 'Inconnu'}`}</span>
+              </div>
+              <div className="flex flex-col gap-1 mt-2 pt-2 border-t border-theme-border/50 text-sm font-medium text-theme-textSec">
+                <div className="flex items-center gap-2"><Calendar size={14} /> Début: <span className="text-theme-text">{aff.dateDebut}</span></div>
+                <div className="flex items-center gap-2"><Calendar size={14} /> Fin: <span className="text-theme-text">{aff.dateFin}</span></div>
+              </div>
             </div>
 
             {(role === 'ADMIN' || role === 'CHEF_PROJET') && (
-                <div className="pt-4 border-t border-theme-border text-right mt-auto">
-                    <button onClick={() => handleDelete(aff.employeId, aff.phaseId)} className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
-                        <Trash2 size={18} />
-                    </button>
-                </div>
+              <div className="pt-4 border-t border-theme-border text-right mt-auto">
+                <button onClick={() => handleDelete(aff.employeId, aff.phaseId)} className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+                  <Trash2 size={18} />
+                </button>
+              </div>
             )}
           </div>
         ))}
         {affectations.length === 0 && (
-            <div className="col-span-full p-8 text-center text-theme-textSec">Aucune affectation trouvée.</div>
+          <div className="col-span-full p-8 text-center text-theme-textSec">Aucune affectation trouvée.</div>
         )}
       </div>
 
@@ -157,30 +164,30 @@ export default function Affectations() {
                 <X size={24} />
               </button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4 overflow-y-auto">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-theme-text">Employé (Ressource)</label>
-                <select name="employeId" value={formData.employeId} onChange={handleChange} required className="w-full p-2.5 rounded-lg bg-theme-bg border border-theme-border text-theme-text focus:outline-none focus:border-theme-accent [color-scheme:light_dark]">
+                <select name="employeId" value={formData.employeId} onChange={handleChange} required className="w-full p-2.5 rounded-lg bg-theme-bg border border-theme-border text-theme-text focus:outline-none focus:border-theme-accent">
                   <option value="">-- Sélectionner un employé --</option>
                   {employes.map(emp => <option key={emp.id} value={emp.id}>{getEmployeDisplay(emp)}</option>)}
                 </select>
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-theme-text">Phase du projet</label>
-                <select name="phaseId" value={formData.phaseId} onChange={handleChange} required className="w-full p-2.5 rounded-lg bg-theme-bg border border-theme-border text-theme-text focus:outline-none focus:border-theme-accent [color-scheme:light_dark]">
+                <select name="phaseId" value={formData.phaseId} onChange={handleChange} required className="w-full p-2.5 rounded-lg bg-theme-bg border border-theme-border text-theme-text focus:outline-none focus:border-theme-accent">
                   <option value="">-- Sélectionner une phase --</option>
-                  {phases.map(phase => <option key={phase.id} value={phase.id}>{getPhaseDisplay(phase)} - {phase.montant?.toLocaleString()} MAD</option>)}
+                  {phases.map(phase => <option key={phase.id} value={phase.id}>{getPhaseDisplay(phase)}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-medium text-theme-text">Date de début</label>
-                  <input name="dateDebut" type="date" value={formData.dateDebut} onChange={handleChange} required className="w-full p-2.5 rounded-lg bg-theme-bg border border-theme-border text-theme-text focus:outline-none focus:border-theme-accent [color-scheme:light_dark]" />
+                  <input name="dateDebut" type="date" value={formData.dateDebut} onChange={handleChange} required className="w-full p-2.5 rounded-lg bg-theme-bg border border-theme-border text-theme-text focus:outline-none focus:border-theme-accent" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-medium text-theme-text">Date de fin</label>
-                  <input name="dateFin" type="date" value={formData.dateFin} onChange={handleChange} required className="w-full p-2.5 rounded-lg bg-theme-bg border border-theme-border text-theme-text focus:outline-none focus:border-theme-accent [color-scheme:light_dark]" />
+                  <input name="dateFin" type="date" value={formData.dateFin} onChange={handleChange} required className="w-full p-2.5 rounded-lg bg-theme-bg border border-theme-border text-theme-text focus:outline-none focus:border-theme-accent" />
                 </div>
               </div>
 

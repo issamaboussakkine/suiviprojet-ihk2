@@ -17,13 +17,13 @@ const Sidebar = () => {
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'SECRETAIRE', 'DIRECTEUR', 'CHEF_PROJET', 'COMPTABLE', 'COLLABORATEUR'] },
     { name: 'Organismes', path: '/organismes', icon: Building2, roles: ['ADMIN', 'SECRETAIRE'] },
     { name: 'Employés', path: '/employes', icon: Users, roles: ['ADMIN'] },
-    { name: 'Projets', path: '/projets', icon: Briefcase, roles: ['ADMIN', 'SECRETAIRE', 'CHEF_PROJET'] },
+    { name: 'Projets', path: '/projets', icon: Briefcase, roles: ['ADMIN', 'SECRETAIRE', 'DIRECTEUR', 'CHEF_PROJET'] },
     { name: 'Phases', path: '/phases', icon: Layers, roles: ['ADMIN', 'CHEF_PROJET'] },
     { name: 'Affectations', path: '/affectations', icon: LinkIcon, roles: ['ADMIN', 'CHEF_PROJET'] },
     { name: 'Livrables', path: '/livrables', icon: CheckSquare, roles: ['ADMIN', 'CHEF_PROJET', 'COLLABORATEUR'] },
     { name: 'Documents', path: '/documents', icon: FileText, roles: ['ADMIN', 'CHEF_PROJET'] },
     { name: 'Factures', path: '/factures', icon: CreditCard, roles: ['ADMIN', 'COMPTABLE'] },
-    { name: 'Reporting', path: '/reporting', icon: PieChart, roles: ['ADMIN', 'DIRECTEUR'] },
+    { name: 'Reporting', path: '/reporting', icon: PieChart, roles: ['ADMIN', 'DIRECTEUR', 'COMPTABLE'] },
   ];
 
   // Si on n'a pas de rôle défini (ex: non connecté), on ne montre rien

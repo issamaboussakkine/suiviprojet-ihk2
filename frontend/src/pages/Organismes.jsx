@@ -4,8 +4,10 @@ import { useAuthStore } from '../store/useAuthStore';
 import { Plus, X, Loader2, Building2, MapPin, Phone, Mail, Trash2 } from 'lucide-react';
 
 export default function Organismes() {
-  const { user } = useAuthStore();
-  const role = user?.role;
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const role = user.role?.code || user.role;
+  console.log("Rôle actuel :", role);
+
   const [organismes, setOrganismes] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -62,8 +64,8 @@ export default function Organismes() {
           <h1 className="text-2xl font-bold text-theme-text mb-1">Organismes Clients</h1>
           <p className="text-theme-textSec text-sm">Gestion des annonceurs et entités partenaires</p>
         </div>
-        {(role === 'ADMIN' || role === 'SECRETAIRE') && (
-          <button 
+        {(role === 'SECRETAIRE' || role === 'ADMIN') && (
+          <button
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 bg-theme-accent text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity font-medium"
           >
@@ -80,7 +82,7 @@ export default function Organismes() {
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-theme-bg border border-theme-border flex items-center justify-center shrink-0">
-                    <Building2 size={24} className="text-theme-accent" />
+                  <Building2 size={24} className="text-theme-accent" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-theme-text">{o.nom}</h3>
@@ -89,31 +91,31 @@ export default function Organismes() {
             </div>
 
             <div className="space-y-3 mb-4 flex-1">
-                <div className="flex items-start gap-2 text-sm text-theme-text">
-                    <MapPin size={16} className="text-theme-textSec shrink-0 mt-0.5" />
-                    <span className="line-clamp-2">{o.adresse || 'Aucune adresse renseignée'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-theme-text">
-                    <Phone size={16} className="text-theme-textSec shrink-0" />
-                    <span>{o.telephone || 'Non renseigné'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-theme-text">
-                    <Mail size={16} className="text-theme-textSec shrink-0" />
-                    <span className="truncate">{o.email_contact || 'Non renseigné'}</span>
-                </div>
+              <div className="flex items-start gap-2 text-sm text-theme-text">
+                <MapPin size={16} className="text-theme-textSec shrink-0 mt-0.5" />
+                <span className="line-clamp-2">{o.adresse || 'Aucune adresse renseignée'}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-theme-text">
+                <Phone size={16} className="text-theme-textSec shrink-0" />
+                <span>{o.telephone || 'Non renseigné'}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-theme-text">
+                <Mail size={16} className="text-theme-textSec shrink-0" />
+                <span className="truncate">{o.email_contact || 'Non renseigné'}</span>
+              </div>
             </div>
 
             {(role === 'ADMIN') && (
-                <div className="pt-4 border-t border-theme-border text-right mt-auto">
-                    <button onClick={() => handleDelete(o.id)} className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
-                        <Trash2 size={18} />
-                    </button>
-                </div>
+              <div className="pt-4 border-t border-theme-border text-right mt-auto">
+                <button onClick={() => handleDelete(o.id)} className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+                  <Trash2 size={18} />
+                </button>
+              </div>
             )}
           </div>
         ))}
         {organismes.length === 0 && (
-            <div className="col-span-full p-8 text-center text-theme-textSec">Aucun organisme enregistré.</div>
+          <div className="col-span-full p-8 text-center text-theme-textSec">Aucun organisme enregistré.</div>
         )}
       </div>
 
@@ -126,7 +128,7 @@ export default function Organismes() {
                 <X size={24} />
               </button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4 overflow-y-auto">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-theme-text">Raison sociale / Nom</label>

@@ -12,27 +12,27 @@ import {
 } from 'recharts';
 
 const StatCard = ({ title, value, icon: Icon }) => (
-    <div className="bg-theme-card rounded-xl p-5 shadow-sm border border-theme-border flex justify-between items-center transition-colors duration-200">
-        <div>
-            <p className="text-theme-textSec text-sm m-0 mb-1">{title}</p>
-            <h3 className="text-2xl font-bold text-theme-text m-0">{value}</h3>
-        </div>
-        <div className="w-12 h-12 rounded-xl bg-theme-accent flex items-center justify-center shrink-0">
-            <Icon size={22} className="text-white dark:text-theme-card" />
-        </div>
+  <div className="bg-theme-card rounded-xl p-5 shadow-sm border border-theme-border flex justify-between items-center transition-colors duration-200">
+    <div>
+      <p className="text-theme-textSec text-sm m-0 mb-1">{title}</p>
+      <h3 className="text-2xl font-bold text-theme-text m-0">{value}</h3>
     </div>
+    <div className="w-12 h-12 rounded-xl bg-theme-accent flex items-center justify-center shrink-0">
+      <Icon size={22} className="text-white dark:text-theme-card" />
+    </div>
+  </div>
 );
 
 const ProgressBar = ({ taux, label }) => (
-    <div className="mb-3">
-        <div className="flex justify-between mb-1">
-            <span className="text-xs text-theme-textSec">{label}</span>
-            <span className="text-xs font-bold text-theme-text">{taux}%</span>
-        </div>
-        <div className="bg-theme-bg rounded-full h-2 overflow-hidden border border-theme-border">
-            <div className="bg-theme-accent h-full rounded-full transition-all duration-500" style={{ width: `${taux}%` }} />
-        </div>
+  <div className="mb-3">
+    <div className="flex justify-between mb-1">
+      <span className="text-xs text-theme-textSec">{label}</span>
+      <span className="text-xs font-bold text-theme-text">{taux}%</span>
     </div>
+    <div className="bg-theme-bg rounded-full h-2 overflow-hidden border border-theme-border">
+      <div className="bg-theme-accent h-full rounded-full transition-all duration-500" style={{ width: `${taux}%` }} />
+    </div>
+  </div>
 );
 
 const Dashboard = () => {
@@ -98,7 +98,8 @@ const Dashboard = () => {
           setProjetsParMois(chartData);
         }
 
-        setProjetsAvecTaux(projets.slice(0, 4).map(p => ({ ...p, tauxAvancement: p.tauxAvancement || Math.floor(Math.random() * 100) })));
+        // Utilise le vrai tauxAvancement renvoyé par le backend (maintenant dans le DTO)
+        setProjetsAvecTaux(projets.slice(0, 4).map(p => ({ ...p, tauxAvancement: p.tauxAvancement ?? 0 })));
 
       } catch (error) {
         console.error("Erreur chargement dashboard:", error);
@@ -153,7 +154,10 @@ const Dashboard = () => {
                 <div className="flex justify-between items-center mb-2">
                   <h4 className="font-medium text-theme-text m-0">{projet.nom}</h4>
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-theme-border text-theme-text">
-                    {projet.statut === 'TERMINE' ? '✓ Terminé' : projet.statut === 'EN_COURS' ? '🔄 En cours' : '⏳ En attente'}
+                    {projet.statut === 'TERMINE' ? '✓ Terminé'
+                     : projet.statut === 'EN_COURS' ? '🔄 En cours'
+                     : projet.statut === 'VALIDE' ? '✅ Validé'
+                     : '⏳ En attente'}
                   </span>
                 </div>
                 <ProgressBar taux={projet.tauxAvancement} label="Avancement" />

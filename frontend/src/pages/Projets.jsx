@@ -4,8 +4,11 @@ import { useAuthStore } from '../store/useAuthStore';
 import { Plus, X, Loader2, CheckCircle, PlayCircle, Trash2 } from 'lucide-react';
 
 export default function Projets() {
-  const { user } = useAuthStore();
-  const role = user?.role;
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const role = user.role?.code || user.role;
+  console.log("[Projets] user brut localStorage =", localStorage.getItem('user'));
+  console.log("[Projets] role extrait =", role);
+
   const [projets, setProjets] = useState([]);
   const [organismes, setOrganismes] = useState([]);
   const [employes, setEmployes] = useState([]);
@@ -16,6 +19,7 @@ export default function Projets() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
+  const [statusLoading, setStatusLoading] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -44,7 +48,6 @@ export default function Projets() {
     e.preventDefault();
     setLoading(true); setMessage('');
     try {
-      // By default new project might be "EN_ATTENTE"
       await api.post('/projets', { ...formData, statut: 'EN_ATTENTE' });
       setMessage('Projet créé avec succès !');
       setFormData({ nom: '', code: '', dateDebut: '', dateFin: '', montant: '', organisme_id: '', chef_projet_id: '' });
@@ -63,18 +66,34 @@ export default function Projets() {
     } catch (err) { alert('Erreur lors de la suppression'); }
   };
 
+  const STATUT_LABELS = { VALIDE: 'validé ✓', EN_COURS: 'démarré ▶', TERMINE: 'terminé ✔' };
+
   const updateStatus = async (projet, newStatut) => {
+    setStatusLoading(projet.id);
     try {
-      await api.put(`/projets/${projet.id}`, { ...projet, statut: newStatut });
-      fetchData();
-    } catch (err) { alert('Erreur mise à jour statut'); }
+      const endpointMap = { VALIDE: 'valider', EN_COURS: 'demarrer', TERMINE: 'terminer' };
+      const endpoint = endpointMap[newStatut];
+      if (!endpoint) return;
+
+      await api.put(`/projets/${projet.id}/${endpoint}`);
+      await fetchData();
+
+      setMessage(`Projet ${STATUT_LABELS[newStatut] || newStatut}`);
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      console.error('[Projets] updateStatus erreur:', err.response?.data || err.message);
+      setMessage('Erreur : ' + (err.response?.data?.error || err.response?.data?.message || err.message));
+      setTimeout(() => setMessage(''), 5000);
+    } finally {
+      setStatusLoading(null);
+    }
   };
 
   const getStatusBadge = (statut) => {
     switch (statut) {
       case 'TERMINE': return <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs rounded-full font-bold">Terminé</span>;
-      case 'EN_COURS': return <span className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs rounded-full font-bold">En cours</span>;
-      case 'VALIDE': return <span className="px-2 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 text-xs rounded-full font-bold">Validé</span>;
+      case 'EN_COURS': return <span className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 text-xs rounded-full font-bold">En cours</span>;
+      case 'VALIDE': return <span className="px-2 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 text-xs rounded-full font-bold">Validé</span>;
       default: return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 text-xs rounded-full font-bold">En attente</span>;
     }
   };
@@ -88,8 +107,8 @@ export default function Projets() {
           <h1 className="text-2xl font-bold text-theme-text mb-1">Gestion des Projets</h1>
           <p className="text-theme-textSec text-sm">Liste et suivi de tous les projets</p>
         </div>
-        {(role === 'ADMIN' || role === 'SECRETAIRE' || role === 'CHEF_PROJET') && (
-          <button 
+        {(role === 'SECRETAIRE') && (
+          <button
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 bg-theme-accent text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity font-medium"
           >
@@ -112,7 +131,7 @@ export default function Projets() {
                 {getStatusBadge(p.statut)}
               </div>
               <p className="text-2xl font-bold text-theme-text mb-4">{p.montant?.toLocaleString()} <span className="text-sm font-normal text-theme-textSec">MAD</span></p>
-              
+
               <div className="mb-4">
                 <div className="flex justify-between text-xs text-theme-textSec mb-1">
                   <span>Avancement</span>
@@ -125,23 +144,40 @@ export default function Projets() {
             </div>
 
             <div className="flex gap-2 mt-4 pt-4 border-t border-theme-border justify-between items-center">
-                <div className="flex gap-2">
-                    {role === 'DIRECTEUR' && (!p.statut || p.statut === 'EN_ATTENTE') && (
-                    <button onClick={() => updateStatus(p, 'VALIDE')} className="flex items-center gap-1 text-xs px-3 py-1.5 bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 rounded-lg font-medium hover:bg-purple-200 transition-colors">
-                        <CheckCircle size={14} /> Valider
-                    </button>
-                    )}
-                    {role === 'CHEF_PROJET' && p.statut === 'VALIDE' && (
-                    <button onClick={() => updateStatus(p, 'EN_COURS')} className="flex items-center gap-1 text-xs px-3 py-1.5 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded-lg font-medium hover:bg-blue-200 transition-colors">
-                        <PlayCircle size={14} /> Démarrer
-                    </button>
-                    )}
-                </div>
-                {(role === 'ADMIN') && (
-                    <button onClick={() => handleDelete(p.id)} className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
-                        <Trash2 size={18} />
-                    </button>
+              <div className="flex gap-2">
+                {/* DIRECTEUR - Valider (affiche pour EN_ATTENTE et aussi pour les projets déjà VALIDE si besoin) */}
+                {role === 'DIRECTEUR' && p.statut !== 'EN_COURS' && p.statut !== 'TERMINE' && (
+                  <button
+                    onClick={() => updateStatus(p, 'VALIDE')}
+                    disabled={statusLoading === p.id}
+                    className="flex items-center gap-1 text-xs px-3 py-1.5 bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 rounded-lg font-medium hover:bg-purple-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {statusLoading === p.id
+                      ? <Loader2 size={14} className="animate-spin" />
+                      : <CheckCircle size={14} />}
+                    Valider
+                  </button>
                 )}
+
+                {/* CHEF_PROJET - Démarrer */}
+                {role === 'CHEF_PROJET' && p.statut === 'VALIDE' && (
+                  <button
+                    onClick={() => updateStatus(p, 'EN_COURS')}
+                    disabled={statusLoading === p.id}
+                    className="flex items-center gap-1 text-xs px-3 py-1.5 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded-lg font-medium hover:bg-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {statusLoading === p.id
+                      ? <Loader2 size={14} className="animate-spin" />
+                      : <PlayCircle size={14} />}
+                    Démarrer
+                  </button>
+                )}
+              </div>
+              {(role === 'ADMIN') && (
+                <button onClick={() => handleDelete(p.id)} className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+                  <Trash2 size={18} />
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -156,7 +192,7 @@ export default function Projets() {
                 <X size={24} />
               </button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4 overflow-y-auto">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-theme-text">Nom du projet</label>
