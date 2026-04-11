@@ -23,4 +23,17 @@ public interface ProjetService {
     double getMontantTotalProjets();
     long countProjetsEnCours();
     long countProjetsTermines();
+
+    // ========== NOUVELLES MÉTHODES À AJOUTER ==========
+
+    // Taux d'avancement
+    int getTauxAvancement(Long projetId);
+
+    // Workflow de validation
+    Projet validerProjet(Long id);
+    Projet demarrerProjet(Long id);
+    Projet terminerProjet(Long id);
+
+    // Récupérer tous les projets avec leur taux
+    List<Projet> getAllProjetsAvecTaux();
 }

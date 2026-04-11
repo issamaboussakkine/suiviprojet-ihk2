@@ -6,11 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
 import java.util.*;
 
-/**
- * Représente une étape de réalisation d'un projet.
- * Chaque phase a ses propres états : réalisation, facturation, paiement.
- * Elle est associée à des employés via Affectation et produit des livrables.
- */
 @Entity
 @Table(name = "phase")
 @Data @NoArgsConstructor @AllArgsConstructor
@@ -23,31 +18,70 @@ public class Phase {
   private String description;
   private LocalDate dateDebut;
   private LocalDate dateFin;
-
-  // Montant à régler à la clôture de cette phase
   private double montant;
-
-  // true = phase terminée
   private boolean etatRealisation;
-
-  // true = facture émise pour cette phase
   private boolean etatFacturation;
-
-  // true = paiement reçu pour cette phase
   private boolean etatPaiement;
 
-  // Projet auquel appartient cette phase
   @ManyToOne
   @JoinColumn(name = "projet_id")
   private Projet projet;
 
-  // Documents livrables produits à la fin de cette phase
   @JsonIgnore
   @OneToMany(mappedBy = "phase", cascade = CascadeType.ALL)
   private List<Livrable> livrables = new ArrayList<>();
 
-  // Affectations des employés sur cette phase
   @JsonIgnore
   @OneToMany(mappedBy = "phase", cascade = CascadeType.ALL)
   private List<Affectation> affectations = new ArrayList<>();
+
+  // ========== MÉTHODES EXISTANTES ==========
+
+  public String getStatut() {
+    if (this.etatRealisation) {
+      return "TERMINEE";
+    }
+    LocalDate aujourdhui = LocalDate.now();
+    if (this.dateDebut != null && !aujourdhui.isBefore(this.dateDebut)) {
+      return "EN_COURS";
+    }
+    return "NON_COMMENCEE";
+  }
+
+  // ========== NOUVELLES MÉTHODES ==========
+
+  // Démarrer la phase
+  public void demarrer() {
+    if ("NON_COMMENCEE".equals(getStatut())) {
+      this.etatRealisation = false;
+      this.dateDebut = LocalDate.now();
+    } else {
+      throw new IllegalStateException("La phase ne peut pas être démarrée. Statut: " + getStatut());
+    }
+  }
+
+  // Terminer la phase
+  public void terminer() {
+    if ("EN_COURS".equals(getStatut())) {
+      this.etatRealisation = true;
+      this.dateFin = LocalDate.now();
+    } else {
+      throw new IllegalStateException("Seule une phase en cours peut être terminée. Statut: " + getStatut());
+    }
+  }
+
+  // Vérifier si la phase est terminée
+  public boolean isTerminee() {
+    return this.etatRealisation;
+  }
+
+  // Vérifier si la phase est en cours
+  public boolean isEnCours() {
+    return "EN_COURS".equals(getStatut());
+  }
+
+  // Vérifier si la phase est non commencée
+  public boolean isNonCommencee() {
+    return "NON_COMMENCEE".equals(getStatut());
+  }
 }

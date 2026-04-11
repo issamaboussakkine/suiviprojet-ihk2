@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -117,5 +119,71 @@ public class ProjetController {
     @GetMapping("/count/termines")
     public ResponseEntity<Long> countProjetsTermines() {
         return ResponseEntity.ok(projetService.countProjetsTermines());
+    }
+
+    // ========== NOUVEAUX ENDPOINTS ==========
+
+    // GET taux d'avancement d'un projet
+    @GetMapping("/{id}/taux-avancement")
+    public ResponseEntity<Integer> getTauxAvancement(@PathVariable Long id) {
+        int taux = projetService.getTauxAvancement(id);
+        return ResponseEntity.ok(taux);
+    }
+
+    // GET tous les projets avec leur taux d'avancement
+    @GetMapping("/avec-taux")
+    public List<ProjetDTO> getAllProjetsAvecTaux() {
+        List<Projet> projets = projetService.getAllProjetsAvecTaux();
+        return projets.stream()
+                .map(projetMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    // PUT valider un projet (Directeur)
+    @PutMapping("/{id}/valider")
+    public ResponseEntity<Map<String, String>> validerProjet(@PathVariable Long id) {
+        try {
+            Projet projet = projetService.validerProjet(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Projet validé avec succès");
+            response.put("statut", projet.getStatut());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    // PUT démarrer un projet (Chef de projet)
+    @PutMapping("/{id}/demarrer")
+    public ResponseEntity<Map<String, String>> demarrerProjet(@PathVariable Long id) {
+        try {
+            Projet projet = projetService.demarrerProjet(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Projet démarré avec succès");
+            response.put("statut", projet.getStatut());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    // PUT terminer un projet
+    @PutMapping("/{id}/terminer")
+    public ResponseEntity<Map<String, String>> terminerProjet(@PathVariable Long id) {
+        try {
+            Projet projet = projetService.terminerProjet(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Projet terminé avec succès");
+            response.put("statut", projet.getStatut());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
     }
 }

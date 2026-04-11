@@ -1,26 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  Building2, 
-  Users, 
-  Briefcase, 
-  Layers, 
-  Link as LinkIcon, 
-  CheckSquare, 
-  FileText, 
-  CreditCard, 
-  PieChart, 
-  LayoutDashboard,
-  ChevronLeft,
-  ChevronRight
+  Building2, Users, Briefcase, Layers, Link as LinkIcon, 
+  CheckSquare, FileText, CreditCard, PieChart, LayoutDashboard
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
-import clsx from 'clsx';
 
 const Sidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
   const { user } = useAuthStore();
-
   const role = user?.role;
 
   const NAV_ITEMS = [
@@ -39,42 +26,28 @@ const Sidebar = () => {
   const filteredNav = NAV_ITEMS.filter(item => item.roles.includes(role) || item.roles.includes('ALL'));
 
   return (
-    <div className={clsx(
-      "h-full bg-slate-900 border-r border-slate-800 transition-all duration-300 relative flex flex-col",
-      collapsed ? "w-20" : "w-64"
-    )}>
-      <div className="flex items-center justify-between p-4 border-b border-slate-800 h-16">
-        {!collapsed && (
-          <span className="text-xl font-bold text-slate-50 uppercase tracking-wider">
-            IHK<span className="text-blue-500">App</span>
-          </span>
-        )}
-        <button 
-          onClick={() => setCollapsed(!collapsed)}
-          className="mx-auto text-slate-400 hover:text-slate-50 transition-colors bg-slate-800 rounded p-1"
-        >
-          {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-        </button>
+    <div className="h-full w-full bg-theme-card border-r border-theme-border flex flex-col transition-colors duration-200">
+      <div className="flex items-center justify-center px-4 border-b border-theme-border h-16 shrink-0 transition-colors duration-200">
+        <span className="text-xl font-bold text-theme-text uppercase tracking-widest transition-colors duration-200">
+          IHK<span className="text-theme-accent">App</span>
+        </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-4 scrollbar-hide">
-        <ul className="space-y-2 px-3">
+      <div className="flex-1 overflow-y-auto py-4 px-3">
+        <ul className="list-none p-0 m-0 flex flex-col gap-2">
           {filteredNav.map((item) => {
             const Icon = item.icon;
             return (
               <li key={item.path}>
                 <NavLink
                   to={item.path}
-                  className={({ isActive }) => clsx(
-                    "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
-                    isActive 
-                      ? "bg-blue-600/10 text-blue-500 font-medium" 
-                      : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-100"
-                  )}
-                  title={collapsed ? item.name : undefined}
+                  className={({ isActive }) => `
+                    flex items-center gap-3 p-3 rounded-xl no-underline transition-all duration-200
+                    ${isActive ? 'bg-theme-accent text-white font-bold' : 'bg-transparent text-theme-text font-normal hover:bg-theme-bg'}
+                  `}
                 >
-                  <Icon size={20} className={collapsed ? "mx-auto" : ""} />
-                  {!collapsed && <span>{item.name}</span>}
+                  <Icon size={20} />
+                  <span>{item.name}</span>
                 </NavLink>
               </li>
             );

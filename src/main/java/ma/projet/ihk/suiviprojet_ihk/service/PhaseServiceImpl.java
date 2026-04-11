@@ -106,6 +106,30 @@ public class PhaseServiceImpl implements PhaseService {
         return null;
     }
 
+    // ========== NOUVELLES MÉTHODES WORKFLOW ==========
+
+    @Override
+    public Phase demarrerPhase(Long id) {
+        Optional<Phase> phaseOpt = phaseRepository.findById(Math.toIntExact(id));
+        if (phaseOpt.isPresent()) {
+            Phase phase = phaseOpt.get();
+            phase.demarrer();
+            return phaseRepository.save(phase);
+        }
+        throw new RuntimeException("Phase non trouvée avec l'ID: " + id);
+    }
+
+    @Override
+    public Phase terminerPhase(Long id) {
+        Optional<Phase> phaseOpt = phaseRepository.findById(Math.toIntExact(id));
+        if (phaseOpt.isPresent()) {
+            Phase phase = phaseOpt.get();
+            phase.terminer();
+            return phaseRepository.save(phase);
+        }
+        throw new RuntimeException("Phase non trouvée avec l'ID: " + id);
+    }
+
     @Override
     public double getMontantTotalPhasesByProjet(Long projetId) {
         return phaseRepository.findByProjetId(Math.toIntExact(projetId))

@@ -89,4 +89,78 @@ public class ProjetServiceImpl implements ProjetService {
                 .filter(p -> p.getDateFin() != null && p.getDateFin().isBefore(aujourdhui))
                 .count();
     }
+
+    // ========== NOUVELLES MÉTHODES ==========
+
+    @Override
+    public int getTauxAvancement(Long projetId) {
+        Optional<Projet> projetOpt = getProjetById(projetId);
+        if (projetOpt.isPresent()) {
+            Projet projet = projetOpt.get();
+            if (projet.getPhases() == null || projet.getPhases().isEmpty()) {
+                return 0;
+            }
+            long totalPhases = projet.getPhases().size();
+            long phasesTerminees = projet.getPhases().stream()
+                    .filter(phase -> phase.isEtatRealisation())
+                    .count();
+            return (int) (phasesTerminees * 100 / totalPhases);
+        }
+        return 0;
+    }
+
+    @Override
+    public List<Projet> getAllProjetsAvecTaux() {
+        List<Projet> projets = getAllProjets();
+        for (Projet projet : projets) {
+            // Forcer le calcul du taux
+            projet.getTauxAvancement();
+        }
+        return projets;
+    }
+
+    @Override
+    public Projet validerProjet(Long id) {
+        Optional<Projet> projetOpt = getProjetById(id);
+        if (projetOpt.isPresent()) {
+            Projet projet = projetOpt.get();
+            if (projet.getStatut() == null || "EN_ATTENTE".equals(projet.getStatut())) {
+                projet.setStatut("VALIDE");
+                return updateProjet(id, projet);
+            } else {
+                throw new RuntimeException("Le projet ne peut pas être validé (statut actuel: " + projet.getStatut() + ")");
+            }
+        }
+        throw new RuntimeException("Projet non trouvé avec l'ID: " + id);
+    }
+
+    @Override
+    public Projet demarrerProjet(Long id) {
+        Optional<Projet> projetOpt = getProjetById(id);
+        if (projetOpt.isPresent()) {
+            Projet projet = projetOpt.get();
+            if ("VALIDE".equals(projet.getStatut())) {
+                projet.setStatut("EN_COURS");
+                return updateProjet(id, projet);
+            } else {
+                throw new RuntimeException("Le projet ne peut pas démarrer (statut actuel: " + projet.getStatut() + ")");
+            }
+        }
+        throw new RuntimeException("Projet non trouvé avec l'ID: " + id);
+    }
+
+    @Override
+    public Projet terminerProjet(Long id) {
+        Optional<Projet> projetOpt = getProjetById(id);
+        if (projetOpt.isPresent()) {
+            Projet projet = projetOpt.get();
+            if ("EN_COURS".equals(projet.getStatut())) {
+                projet.setStatut("TERMINE");
+                return updateProjet(id, projet);
+            } else {
+                throw new RuntimeException("Seul un projet en cours peut être terminé (statut actuel: " + projet.getStatut() + ")");
+            }
+        }
+        throw new RuntimeException("Projet non trouvé avec l'ID: " + id);
+    }
 }

@@ -25,6 +25,10 @@ public interface PhaseService {
     Phase marquerFacturee(Long id);
     Phase marquerPayee(Long id);
 
+    // ========== NOUVELLES MÉTHODES WORKFLOW ==========
+    Phase demarrerPhase(Long id);
+    Phase terminerPhase(Long id);
+
     // Statistiques
     double getMontantTotalPhasesByProjet(Long projetId);
     long countPhasesEnCoursByProjet(Long projetId);

@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -130,6 +132,40 @@ public class PhaseController {
             return ResponseEntity.ok(phaseMapper.toDto(phase));
         }
         throw new PhaseNotFoundException("Phase non trouvée avec l'ID: " + id);
+    }
+
+    // ========== NOUVEAUX ENDPOINTS WORKFLOW ==========
+
+    // PUT démarrer une phase
+    @PutMapping("/{id}/demarrer")
+    public ResponseEntity<Map<String, String>> demarrerPhase(@PathVariable Long id) {
+        try {
+            Phase phase = phaseService.demarrerPhase(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Phase démarrée avec succès");
+            response.put("statut", phase.getStatut());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    // PUT terminer une phase (avec livrable)
+    @PutMapping("/{id}/terminer-phase")
+    public ResponseEntity<Map<String, String>> terminerPhase(@PathVariable Long id) {
+        try {
+            Phase phase = phaseService.terminerPhase(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Phase terminée avec succès");
+            response.put("statut", phase.getStatut());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
     }
 
     // GET montant total des phases d'un projet
