@@ -9,16 +9,19 @@ import { useAuthStore } from '../store/useAuthStore';
 const Sidebar = () => {
   const { user } = useAuthStore();
   
-  // Extraction sûre du rôle (garantit que ce soit une string)
+  // Extraction du rôle
   const roleName = typeof user?.role === 'object' ? (user?.role?.code || user?.role?.libelle || '') : (user?.role || '');
   const normalizedRole = roleName.toUpperCase();
+
+  console.log("=== SIDEBAR DEBUG ===");
+  console.log("normalizedRole =", normalizedRole);
 
   const NAV_ITEMS = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'SECRETAIRE', 'DIRECTEUR', 'CHEF_PROJET', 'COMPTABLE', 'COLLABORATEUR'] },
     { name: 'Organismes', path: '/organismes', icon: Building2, roles: ['ADMIN', 'SECRETAIRE'] },
     { name: 'Employés', path: '/employes', icon: Users, roles: ['ADMIN'] },
     { name: 'Projets', path: '/projets', icon: Briefcase, roles: ['ADMIN', 'SECRETAIRE', 'DIRECTEUR', 'CHEF_PROJET'] },
-    { name: 'Phases', path: '/phases', icon: Layers, roles: ['ADMIN', 'CHEF_PROJET'] },
+    { name: 'Phases', path: '/phases', icon: Layers, roles: ['ADMIN', 'CHEF_PROJET', 'COLLABORATEUR'] },
     { name: 'Affectations', path: '/affectations', icon: LinkIcon, roles: ['ADMIN', 'CHEF_PROJET'] },
     { name: 'Livrables', path: '/livrables', icon: CheckSquare, roles: ['ADMIN', 'CHEF_PROJET', 'COLLABORATEUR'] },
     { name: 'Documents', path: '/documents', icon: FileText, roles: ['ADMIN', 'CHEF_PROJET'] },
@@ -26,8 +29,19 @@ const Sidebar = () => {
     { name: 'Reporting', path: '/reporting', icon: PieChart, roles: ['ADMIN', 'DIRECTEUR', 'COMPTABLE'] },
   ];
 
-  // Si on n'a pas de rôle défini (ex: non connecté), on ne montre rien
-  const filteredNav = normalizedRole ? NAV_ITEMS.filter(item => item.roles.includes(normalizedRole) || item.roles.includes('ALL')) : [];
+  // Filtrage selon le rôle
+  let filteredNav = [];
+
+  if (normalizedRole === 'COLLABORATEUR') {
+    // Pour le collaborateur : Dashboard, Phases, Livrables uniquement
+    filteredNav = NAV_ITEMS.filter(item =>
+      item.name === 'Dashboard' || item.name === 'Phases' || item.name === 'Livrables'
+    );
+  } else if (normalizedRole) {
+    filteredNav = NAV_ITEMS.filter(item => item.roles.includes(normalizedRole));
+  }
+
+  console.log("Menus visibles:", filteredNav.map(item => item.name));
 
   return (
     <div className="h-full w-full bg-theme-card border-r border-theme-border flex flex-col transition-colors duration-200">

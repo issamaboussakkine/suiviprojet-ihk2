@@ -21,8 +21,14 @@ public class FactureServiceImpl implements FactureService {
 
     @Override
     public Facture saveFacture(Facture facture) {
-        // Vérifier que la phase n'est pas déjà facturée
-        if (facture.getPhase() != null) {
+        // Récupérer la phase complète avec son montant
+        if (facture.getPhase() != null && facture.getPhase().getId() > 0) {
+            Phase phase = phaseRepository.findById(facture.getPhase().getId()).orElse(null);
+            if (phase != null) {
+                facture.setPhase(phase);
+            }
+
+            // Vérifier que la phase n'est pas déjà facturée
             Facture existante = factureRepository.findByPhaseId(facture.getPhase().getId());
             if (existante != null) {
                 throw new RuntimeException("Cette phase a déjà une facture");

@@ -40,7 +40,7 @@ function App() {
                  <Route path="/projets" element={<Projets />} />
               </Route>
               
-              <Route element={<RoleRoute roles={['ADMIN', 'CHEF_PROJET']} />}>
+              <Route element={<RoleRoute roles={['ADMIN', 'CHEF_PROJET', 'COLLABORATEUR']} />}>
                  <Route path="/phases" element={<Phases />} />
                  <Route path="/affectations" element={<Affectations />} />
                  <Route path="/documents" element={<Documents />} />

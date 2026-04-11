@@ -134,6 +134,28 @@ public class PhaseController {
         throw new PhaseNotFoundException("Phase non trouvée avec l'ID: " + id);
     }
 
+    @PutMapping("/{id}/update-status")
+    public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        try {
+            Phase phase = phaseService.getPhaseById(id)
+                    .orElseThrow(() -> new RuntimeException("Phase non trouvée"));
+
+            Boolean etatRealisation = (Boolean) body.get("etatRealisation");
+            String statut = (String) body.get("statut");
+
+            if (etatRealisation != null) {
+                phase.setEtatRealisation(etatRealisation);
+            }
+            if (statut != null) {
+                phase.setStatut(statut);
+            }
+
+            phaseService.savePhase(phase);
+            return ResponseEntity.ok(Map.of("message", "Statut mis à jour", "etatRealisation", phase.isEtatRealisation()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
     // ========== NOUVEAUX ENDPOINTS WORKFLOW ==========
 
     // PUT démarrer une phase

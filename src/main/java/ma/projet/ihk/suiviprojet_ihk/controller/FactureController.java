@@ -2,9 +2,11 @@ package ma.projet.ihk.suiviprojet_ihk.controller;
 
 import ma.projet.ihk.suiviprojet_ihk.dto.FactureDTO;
 import ma.projet.ihk.suiviprojet_ihk.entities.Facture;
+import ma.projet.ihk.suiviprojet_ihk.entities.Phase;
 import ma.projet.ihk.suiviprojet_ihk.exception.FactureNotFoundException;
 import ma.projet.ihk.suiviprojet_ihk.mapper.FactureMapper;
 import ma.projet.ihk.suiviprojet_ihk.service.FactureService;
+import ma.projet.ihk.suiviprojet_ihk.service.PhaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,9 @@ public class FactureController {
 
     @Autowired
     private FactureService factureService;
+
+    @Autowired
+    private PhaseService phaseService;
 
     @Autowired
     private FactureMapper factureMapper;
@@ -46,7 +51,17 @@ public class FactureController {
     @PostMapping
     public ResponseEntity<FactureDTO> createFacture(@RequestBody FactureDTO dto) {
         try {
-            Facture facture = factureMapper.toEntity(dto);
+            Facture facture = new Facture();
+
+            // Récupérer la phase pour avoir le montant
+            if (dto.getPhaseId() > 0) {
+                Phase phase = phaseService.getPhaseById(Long.valueOf(dto.getPhaseId())).orElse(null);
+                if (phase != null) {
+                    facture.setPhase(phase);
+                }
+            }
+            facture.setDateFacture(dto.getDateFacture());
+
             Facture saved = factureService.saveFacture(facture);
             return new ResponseEntity<>(factureMapper.toDto(saved), HttpStatus.CREATED);
         } catch (RuntimeException e) {
@@ -60,7 +75,10 @@ public class FactureController {
         Facture existingFacture = factureService.getFactureById(id)
                 .orElseThrow(() -> new FactureNotFoundException("Facture non trouvée avec l'ID: " + id));
 
-        factureMapper.updateEntityFromDto(dto, existingFacture);
+        if (dto.getDateFacture() != null) {
+            existingFacture.setDateFacture(dto.getDateFacture());
+        }
+
         Facture updated = factureService.saveFacture(existingFacture);
         return ResponseEntity.ok(factureMapper.toDto(updated));
     }

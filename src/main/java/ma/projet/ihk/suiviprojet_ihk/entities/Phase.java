@@ -84,4 +84,7 @@ public class Phase {
   public boolean isNonCommencee() {
     return "NON_COMMENCEE".equals(getStatut());
   }
+
+    public void setStatut(String statut) {
+    }
 }
